@@ -1,0 +1,38 @@
+<svg viewBox="0 0 240 340" xmlns="http://www.w3.org/2000/svg" aria-label="character placeholder pointing">
+  <defs>
+    <linearGradient id="hair2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbd5e8"/>
+      <stop offset="100%" stop-color="#d6b3e5"/>
+    </linearGradient>
+    <linearGradient id="dress2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff7d6"/>
+      <stop offset="100%" stop-color="#ffd6c2"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="236" height="336" fill="#fff7f0" stroke="#d4b8c8" stroke-width="1.5" stroke-dasharray="5 5" rx="14"/>
+  <ellipse cx="48" cy="200" rx="22" ry="68" fill="url(#hair2)" transform="rotate(-12 48 200)"/>
+  <ellipse cx="192" cy="200" rx="22" ry="68" fill="url(#hair2)" transform="rotate(12 192 200)"/>
+  <path d="M 70 260 Q 75 200 120 195 Q 165 200 170 260 L 175 305 L 65 305 Z" fill="url(#dress2)" stroke="#e8b8b8" stroke-width="1.2"/>
+  <!-- Pointing arm (right) -->
+  <path d="M 168 215 Q 200 200 218 188 L 222 196 Q 204 212 175 228 Z" fill="#fff0e4" stroke="#e8b8b8" stroke-width="1"/>
+  <circle cx="220" cy="192" r="6" fill="#fff0e4" stroke="#e8b8b8" stroke-width="1"/>
+  <rect x="108" y="180" width="24" height="22" rx="5" fill="#ffeadd"/>
+  <circle cx="120" cy="135" r="62" fill="#fff0e4"/>
+  <path d="M 62 132 Q 60 80 120 65 Q 180 80 178 132 Q 168 100 145 100 L 138 120 L 128 100 L 118 122 L 108 100 L 95 120 L 88 100 Q 72 102 62 132 Z" fill="url(#hair2)"/>
+  <path d="M 60 125 Q 56 165 70 195" fill="url(#hair2)" opacity="0.92"/>
+  <path d="M 180 125 Q 184 165 170 195" fill="url(#hair2)" opacity="0.92"/>
+  <ellipse cx="88" cy="148" rx="10" ry="6" fill="#ffc9d6" opacity="0.65"/>
+  <ellipse cx="152" cy="148" rx="10" ry="6" fill="#ffc9d6" opacity="0.65"/>
+  <!-- Eyes looking right (toward pointed direction) -->
+  <ellipse cx="100" cy="138" rx="7" ry="9" fill="#5a3a4a"/>
+  <ellipse cx="148" cy="138" rx="7" ry="9" fill="#5a3a4a"/>
+  <circle cx="102" cy="135" r="2.4" fill="#fff"/>
+  <circle cx="150" cy="135" r="2.4" fill="#fff"/>
+  <!-- Small smile -->
+  <path d="M 110 162 Q 120 168 130 162" stroke="#7a4658" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <!-- Sparkle near pointing hand -->
+  <g transform="translate(225 180)" fill="#ffd66d">
+    <path d="M 0 -7 L 1.6 -1.6 L 7 0 L 1.6 1.6 L 0 7 L -1.6 1.6 L -7 0 L -1.6 -1.6 Z"/>
+  </g>
+  <text x="120" y="328" text-anchor="middle" font-size="11" font-weight="700" fill="#a0827a" font-family="sans-serif" letter-spacing="2">PLACEHOLDER · pointing</text>
+</svg>

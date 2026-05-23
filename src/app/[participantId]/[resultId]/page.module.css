@@ -1,0 +1,349 @@
+.root {
+  position: relative;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 100% 0%, #fff2ec 0%, transparent 50%),
+    radial-gradient(ellipse at 0% 100%, #f4ecff 0%, transparent 55%),
+    #fffaf3;
+  color: #4a3530;
+  font-family: var(--font-jp);
+  padding: 40px 24px 80px;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.blob1,
+.blob2 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.blob1 {
+  width: 380px; height: 380px;
+  background: #ffe1ec;
+  top: -120px; right: -80px;
+}
+.blob2 {
+  width: 320px; height: 320px;
+  background: #e3d4ff;
+  bottom: -80px; left: -60px;
+}
+
+.main {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 28px;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: 0 8px 28px rgba(170, 130, 120, 0.1);
+}
+
+.charBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.voiceLine {
+  font-family: var(--font-jp);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #5a4540;
+  margin: 0;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 760px) {
+  .hero { grid-template-columns: 1fr; gap: 18px; padding: 22px; }
+  .charBlock { align-items: flex-start; }
+  .voiceLine { text-align: left; }
+}
+
+@media (max-width: 540px) {
+  .hero { padding: 18px; }
+  .charBlock > div {
+    width: min(220px, 100%);
+    height: auto;
+    aspect-ratio: 260 / 368;
+  }
+}
+
+.imageBlock {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #f4ecff;
+  box-shadow: 0 4px 14px rgba(170, 130, 120, 0.12);
+}
+
+.heroHead {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prefRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pref {
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #b08070;
+}
+
+.rankPill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  color: #ffffff;
+}
+.rankS { background: linear-gradient(135deg, #ffd66d 0%, #ff9c4a 100%); }
+.rankA { background: linear-gradient(135deg, #ff9fb6 0%, #ff7186 100%); }
+.rankB { background: linear-gradient(135deg, #b3d4ff 0%, #7fa8e2 100%); }
+.rankC { background: linear-gradient(135deg, #cfc2b2 0%, #a8967f 100%); }
+
+.city {
+  font-family: var(--font-jp);
+  font-size: clamp(40px, 6.5vw, 60px);
+  font-weight: 700;
+  line-height: 1.05;
+  margin: 0;
+  letter-spacing: 0.02em;
+  color: #3a2a25;
+}
+
+.coord {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: #b08070;
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mapBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 26px;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 18px;
+}
+
+.mapWrap {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  min-height: 380px;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+
+.mapsLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 22px;
+  background: #ffffff;
+  color: #3a2a25;
+  font-family: var(--font-jp);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border: 1px solid rgba(170, 130, 120, 0.18);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(170, 130, 120, 0.12);
+  transition: transform 0.12s ease, box-shadow 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.mapsLink:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 159, 182, 0.6);
+  box-shadow: 0 6px 18px rgba(255, 159, 182, 0.25);
+}
+
+.mapsLink:active {
+  transform: translateY(0);
+}
+
+.mapsLinkIcon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ea4335 0%, #c5221f 100%);
+  color: #ffffff;
+  font-size: 17px;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(234, 67, 53, 0.35);
+}
+
+.mapsLinkLabel {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.mapsLinkTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #3a2a25;
+}
+
+.mapsLinkSub {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: #b08070;
+  margin-top: 2px;
+}
+
+.mapsLinkArrow {
+  margin-left: auto;
+  color: #b08070;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+@media (max-width: 540px) {
+  .mapWrap {
+    aspect-ratio: 1 / 1;
+    min-height: 320px;
+  }
+  .mapsLink {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+}
+
+.descBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 26px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 18px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #b08070;
+  margin: 0;
+}
+
+.deco {
+  color: #ff9fb6;
+  font-size: 14px;
+}
+
+.descBody {
+  font-family: var(--font-jp);
+  font-size: 14px;
+  line-height: 1.9;
+  margin: 0;
+  color: #5a4540;
+}
+
+/* ───── アクション行 (画像保存 + シェア) ─────────────── */
+.shareBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.shareNote {
+  font-family: var(--font-jp);
+  font-size: 12px;
+  color: #b08070;
+  margin: 8px 0 0;
+}
+
+.shareBtn {
+  font-family: var(--font-jp);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  padding: 12px 22px;
+  border: 1.5px solid #f3d9c0;
+  background: #ffffff;
+  color: #5a4540;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: transform 0.12s, background 0.15s, border-color 0.15s;
+}
+.shareBtn:hover:not(:disabled) {
+  background: #ff9fb6;
+  border-color: #ff9fb6;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.shareBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ダウンロード(主アクション)はピンク強調 */
+.shareBtnPrimary {
+  background: linear-gradient(135deg, #ff9fb6 0%, #ffb696 100%);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(255, 159, 182, 0.32);
+}
+
+.shareBtnPrimary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff8aa3 0%, #ffa680 100%);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(255, 159, 182, 0.42);
+}

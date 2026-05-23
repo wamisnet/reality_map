@@ -1,0 +1,195 @@
+.root {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font-family: var(--font-mono);
+  color: var(--text);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  pointer-events: auto;
+  z-index: 12;
+  box-shadow: 0 4px 14px rgba(170, 130, 120, 0.1);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.label {
+  font-size: 9px;
+  opacity: 0.7;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+.labelRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.help {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  outline: none;
+}
+
+.helpIcon {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  opacity: 0.8;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+.help:hover .helpIcon,
+.help:focus-visible .helpIcon {
+  opacity: 1;
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  transform: translateX(-30%);
+  min-width: 280px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: top center;
+  transition: opacity 0.15s ease;
+  z-index: 100;
+  text-transform: none;
+  letter-spacing: normal;
+  box-shadow: 0 8px 24px rgba(170, 130, 120, 0.18);
+}
+
+.tooltip::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 30%;
+  border: 5px solid transparent;
+  border-bottom-color: var(--primary);
+}
+
+.help:hover .tooltip,
+.help:focus-visible .tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tooltipItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.tooltipItem:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.tooltipName {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.tooltipDesc {
+  font-size: 11px;
+  color: var(--text);
+  opacity: 0.85;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+
+.input {
+  background: #ffffff;
+  border: 1px solid rgba(170, 130, 120, 0.35);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  padding: 5px 9px;
+  border-radius: 8px;
+  outline: none;
+  min-width: 160px;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--primary);
+}
+
+.numInput {
+  width: 64px;
+  min-width: 0;
+  text-align: center;
+}
+
+.select {
+  min-width: 140px;
+  padding-right: 24px;
+  cursor: pointer;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--primary) 50%),
+    linear-gradient(135deg, var(--primary) 50%, transparent 50%);
+  background-position:
+    calc(100% - 12px) 50%,
+    calc(100% - 7px) 50%;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+}
+
+.select:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.queue {
+  font-size: 10px;
+  opacity: 0.8;
+  padding: 0 8px;
+  border-left: 1px solid var(--line);
+  height: 32px;
+  display: grid;
+  place-items: center;
+}

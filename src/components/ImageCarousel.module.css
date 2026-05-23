@@ -1,0 +1,151 @@
+.root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: oklch(0.94 0.005 240);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.root:focus-visible {
+  outline: 2px solid #ff9fb6;
+  outline-offset: 2px;
+}
+
+.slider {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 320ms ease;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+.slideActive {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.slideCover {
+  object-fit: cover;
+}
+
+.slideContain {
+  object-fit: contain;
+}
+
+/* prev/next ボタン */
+.navBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.85);
+  color: #3a2a25;
+  font-size: 26px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+  opacity: 0.85;
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.navBtn:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.06);
+}
+
+.navBtn:focus-visible {
+  outline: 2px solid #ff9fb6;
+  outline-offset: 2px;
+}
+
+.navPrev {
+  left: 8px;
+}
+
+.navNext {
+  right: 8px;
+}
+
+/* ドットインジケーター */
+.dots {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  padding: 0;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.dotActive {
+  background: #ffffff;
+  transform: scale(1.18);
+}
+
+.dot:focus-visible {
+  outline: 2px solid #ff9fb6;
+  outline-offset: 2px;
+}
+
+/* 件数表示 */
+.count {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.45);
+  color: #ffffff;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  padding: 3px 8px;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+@media (max-width: 540px) {
+  .navBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 22px;
+  }
+}

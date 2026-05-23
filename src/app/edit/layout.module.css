@@ -1,0 +1,9 @@
+/* /edit 配下の共通レイアウト。globals.css の body { overflow: hidden } を
+   この配下では効かなくするため、固定配置のスクロールコンテナで包む。 */
+.shell {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  background: oklch(0.985 0.003 240);
+  color: oklch(0.2 0.02 240);
+}

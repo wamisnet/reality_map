@@ -1,0 +1,64 @@
+.root {
+  composes: side from "./Side.module.css";
+  top: 130px;
+  right: 28px;
+  width: 260px;
+  overflow: hidden;
+}
+
+.head {
+  composes: head from "./Side.module.css";
+}
+
+.rankList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rankRow {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 2px;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+
+.empty {
+  opacity: 0.35;
+}
+
+.badgeCell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rankText {
+  color: var(--text);
+  opacity: 0.78;
+}
+
+.rankCount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.unit {
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  opacity: 0.55;
+  margin-left: 2px;
+}

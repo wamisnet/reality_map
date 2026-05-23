@@ -1,0 +1,22 @@
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  /* EditNav の高さ (固定 sticky) を引いた残り全部を使う */
+  height: calc(100vh - 47px);
+  background: oklch(0.985 0.003 240);
+  overflow: hidden;
+}
+
+.mapSlot {
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+    height: auto;
+    min-height: calc(100vh - 47px);
+  }
+}

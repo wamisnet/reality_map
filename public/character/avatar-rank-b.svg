@@ -1,0 +1,22 @@
+<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-label="avatar placeholder rank-b">
+  <defs>
+    <linearGradient id="ah4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbd5e8"/>
+      <stop offset="100%" stop-color="#d6b3e5"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="236" height="236" fill="#fff7f0" stroke="#d4b8c8" stroke-width="1.5" stroke-dasharray="5 5" rx="20"/>
+  <circle cx="120" cy="125" r="92" fill="url(#ah4)"/>
+  <circle cx="120" cy="130" r="72" fill="#fff0e4"/>
+  <path d="M 48 115 Q 50 60 120 50 Q 190 60 192 115 Q 178 90 152 90 L 142 110 L 130 88 L 120 110 L 110 88 L 98 110 L 88 90 Q 62 92 48 115 Z" fill="url(#ah4)"/>
+  <ellipse cx="92" cy="155" rx="11" ry="6" fill="#ffc9d6" opacity="0.65"/>
+  <ellipse cx="148" cy="155" rx="11" ry="6" fill="#ffc9d6" opacity="0.65"/>
+  <!-- 穏やかな目 (小さめ) -->
+  <ellipse cx="96" cy="142" rx="7" ry="10" fill="#5a3a4a"/>
+  <ellipse cx="144" cy="142" rx="7" ry="10" fill="#5a3a4a"/>
+  <circle cx="98" cy="139" r="2.5" fill="#fff"/>
+  <circle cx="146" cy="139" r="2.5" fill="#fff"/>
+  <!-- やさしい微笑み -->
+  <path d="M 108 168 Q 120 175 132 168" stroke="#7a4658" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <text x="120" y="226" text-anchor="middle" font-size="11" font-weight="700" fill="#a0827a" font-family="sans-serif" letter-spacing="1">PLACEHOLDER · avatar-rank-b</text>
+</svg>

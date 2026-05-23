@@ -1,0 +1,87 @@
+.root {
+  position: relative;
+  padding: 14px 18px;
+  border-radius: 18px;
+  font-family: var(--font-jp);
+  font-size: 14px;
+  line-height: 1.7;
+  color: #4a3530;
+  box-shadow: 0 4px 14px rgba(170, 130, 120, 0.12);
+  max-width: 320px;
+}
+
+.cream { background: #fff7eb; border: 1.5px solid #f3d9c0; }
+.pink { background: #ffeaf1; border: 1.5px solid #f5c1d0; }
+.mint { background: #ecf8ef; border: 1.5px solid #c5e2cb; }
+
+.root::before,
+.root::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+/* Pointer LEFT — tail points to the left */
+.pointerLeft::before {
+  left: -14px;
+  top: 28px;
+  border: 8px solid transparent;
+  border-right-color: inherit;
+  border-right-width: 14px;
+}
+.pointerLeft.cream::before { border-right-color: #f3d9c0; }
+.pointerLeft.pink::before { border-right-color: #f5c1d0; }
+.pointerLeft.mint::before { border-right-color: #c5e2cb; }
+
+.pointerLeft::after {
+  left: -10px;
+  top: 28px;
+  border: 8px solid transparent;
+  border-right-width: 14px;
+}
+.pointerLeft.cream::after { border-right-color: #fff7eb; }
+.pointerLeft.pink::after { border-right-color: #ffeaf1; }
+.pointerLeft.mint::after { border-right-color: #ecf8ef; }
+
+/* Pointer RIGHT */
+.pointerRight::before {
+  right: -14px;
+  top: 28px;
+  border: 8px solid transparent;
+  border-left-width: 14px;
+}
+.pointerRight.cream::before { border-left-color: #f3d9c0; }
+.pointerRight.pink::before { border-left-color: #f5c1d0; }
+.pointerRight.mint::before { border-left-color: #c5e2cb; }
+
+.pointerRight::after {
+  right: -10px;
+  top: 28px;
+  border: 8px solid transparent;
+  border-left-width: 14px;
+}
+.pointerRight.cream::after { border-left-color: #fff7eb; }
+.pointerRight.pink::after { border-left-color: #ffeaf1; }
+.pointerRight.mint::after { border-left-color: #ecf8ef; }
+
+/* Pointer BOTTOM */
+.pointerBottom::before {
+  bottom: -14px;
+  left: 36px;
+  border: 8px solid transparent;
+  border-top-width: 14px;
+}
+.pointerBottom.cream::before { border-top-color: #f3d9c0; }
+.pointerBottom.pink::before { border-top-color: #f5c1d0; }
+.pointerBottom.mint::before { border-top-color: #c5e2cb; }
+
+.pointerBottom::after {
+  bottom: -10px;
+  left: 36px;
+  border: 8px solid transparent;
+  border-top-width: 14px;
+}
+.pointerBottom.cream::after { border-top-color: #fff7eb; }
+.pointerBottom.pink::after { border-top-color: #ffeaf1; }
+.pointerBottom.mint::after { border-top-color: #ecf8ef; }

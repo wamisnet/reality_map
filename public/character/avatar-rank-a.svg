@@ -1,0 +1,25 @@
+<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-label="avatar placeholder rank-a">
+  <defs>
+    <linearGradient id="ah3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbd5e8"/>
+      <stop offset="100%" stop-color="#d6b3e5"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="236" height="236" fill="#fff7f0" stroke="#d4b8c8" stroke-width="1.5" stroke-dasharray="5 5" rx="20"/>
+  <circle cx="120" cy="125" r="92" fill="url(#ah3)"/>
+  <circle cx="120" cy="130" r="72" fill="#fff0e4"/>
+  <path d="M 48 115 Q 50 60 120 50 Q 190 60 192 115 Q 178 90 152 90 L 142 110 L 130 88 L 120 110 L 110 88 L 98 110 L 88 90 Q 62 92 48 115 Z" fill="url(#ah3)"/>
+  <ellipse cx="92" cy="155" rx="12" ry="7" fill="#ffc9d6" opacity="0.75"/>
+  <ellipse cx="148" cy="155" rx="12" ry="7" fill="#ffc9d6" opacity="0.75"/>
+  <!-- ウインク: 左目閉じる, 右目開ける -->
+  <path d="M 88 142 Q 96 148 104 142" stroke="#5a3a4a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+  <ellipse cx="144" cy="142" rx="8" ry="11" fill="#5a3a4a"/>
+  <circle cx="146" cy="139" r="3" fill="#fff"/>
+  <!-- 自信ありの口 -->
+  <path d="M 105 168 Q 120 180 135 168" stroke="#7a4658" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+  <!-- 小さなハート -->
+  <g transform="translate(35 158)" fill="#ff9fb6">
+    <path d="M 0 0 c -3 -3 -8 -3 -8 1 c 0 4 8 9 8 9 c 0 0 8 -5 8 -9 c 0 -4 -5 -4 -8 -1 z"/>
+  </g>
+  <text x="120" y="226" text-anchor="middle" font-size="11" font-weight="700" fill="#a0827a" font-family="sans-serif" letter-spacing="1">PLACEHOLDER · avatar-rank-a</text>
+</svg>

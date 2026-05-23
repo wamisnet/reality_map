@@ -1,0 +1,14 @@
+{
+  "rankS": "/character/uploads/rank-s.png",
+  "rankA": "/character/uploads/rank-a.png",
+  "rankB": "/character/uploads/rank-b.png",
+  "default": "/character/uploads/default.png",
+  "pointing": "/character/uploads/pointing.png",
+  "rankC": "/character/uploads/rank-c.png",
+  "avatarRankS": "/character/uploads/avatar-rank-s.png",
+  "avatarRankA": "/character/uploads/avatar-rank-a.png",
+  "avatarRankB": "/character/uploads/avatar-rank-b.png",
+  "avatarRankC": "/character/uploads/avatar-rank-c.png",
+  "avatarDefault": "/character/uploads/avatar-default.png",
+  "avatarPointing": "/character/uploads/avatar-pointing.png"
+}

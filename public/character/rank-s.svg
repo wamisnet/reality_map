@@ -1,0 +1,43 @@
+<svg viewBox="0 0 240 340" xmlns="http://www.w3.org/2000/svg" aria-label="character placeholder rank-s">
+  <defs>
+    <linearGradient id="hairS" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff0a0"/>
+      <stop offset="100%" stop-color="#ffc56b"/>
+    </linearGradient>
+    <linearGradient id="dressS" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff7d6"/>
+      <stop offset="100%" stop-color="#ffd6c2"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="236" height="336" fill="#fff7f0" stroke="#d4b8c8" stroke-width="1.5" stroke-dasharray="5 5" rx="14"/>
+  <!-- Sparkles all around -->
+  <g fill="#ffd66d">
+    <path d="M 30 60 l 2 -10 l 2 10 l 10 2 l -10 2 l -2 10 l -2 -10 l -10 -2 z"/>
+    <path d="M 210 80 l 2 -10 l 2 10 l 10 2 l -10 2 l -2 10 l -2 -10 l -10 -2 z"/>
+    <path d="M 20 250 l 1.5 -7 l 1.5 7 l 7 1.5 l -7 1.5 l -1.5 7 l -1.5 -7 l -7 -1.5 z"/>
+    <path d="M 218 240 l 1.5 -7 l 1.5 7 l 7 1.5 l -7 1.5 l -1.5 7 l -1.5 -7 l -7 -1.5 z"/>
+  </g>
+  <ellipse cx="48" cy="200" rx="22" ry="68" fill="url(#hairS)" transform="rotate(-12 48 200)"/>
+  <ellipse cx="192" cy="200" rx="22" ry="68" fill="url(#hairS)" transform="rotate(12 192 200)"/>
+  <path d="M 70 260 Q 75 200 120 195 Q 165 200 170 260 L 175 305 L 65 305 Z" fill="url(#dressS)" stroke="#e8b8b8" stroke-width="1.2"/>
+  <rect x="108" y="180" width="24" height="22" rx="5" fill="#ffeadd"/>
+  <circle cx="120" cy="135" r="62" fill="#fff0e4"/>
+  <path d="M 62 132 Q 60 80 120 65 Q 180 80 178 132 Q 168 100 145 100 L 138 120 L 128 100 L 118 122 L 108 100 L 95 120 L 88 100 Q 72 102 62 132 Z" fill="url(#hairS)"/>
+  <path d="M 60 125 Q 56 165 70 195" fill="url(#hairS)" opacity="0.92"/>
+  <path d="M 180 125 Q 184 165 170 195" fill="url(#hairS)" opacity="0.92"/>
+  <ellipse cx="88" cy="150" rx="11" ry="7" fill="#ff9fb6" opacity="0.7"/>
+  <ellipse cx="152" cy="150" rx="11" ry="7" fill="#ff9fb6" opacity="0.7"/>
+  <!-- Star eyes -->
+  <g fill="#e89a00" transform="translate(96 138)">
+    <path d="M 0 -10 L 2.4 -2.4 L 10 0 L 2.4 2.4 L 0 10 L -2.4 2.4 L -10 0 L -2.4 -2.4 Z"/>
+  </g>
+  <g fill="#e89a00" transform="translate(144 138)">
+    <path d="M 0 -10 L 2.4 -2.4 L 10 0 L 2.4 2.4 L 0 10 L -2.4 2.4 L -10 0 L -2.4 -2.4 Z"/>
+  </g>
+  <!-- Open happy mouth -->
+  <path d="M 105 158 Q 120 175 135 158 Q 130 168 120 168 Q 110 168 105 158 Z" fill="#ff6680" stroke="#7a4658" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Crown -->
+  <path d="M 84 70 L 92 50 L 105 65 L 120 45 L 135 65 L 148 50 L 156 70 Z" fill="#ffd66d" stroke="#c98a00" stroke-width="1.5"/>
+  <circle cx="120" cy="62" r="3" fill="#ff9fb6"/>
+  <text x="120" y="328" text-anchor="middle" font-size="11" font-weight="700" fill="#a0827a" font-family="sans-serif" letter-spacing="2">PLACEHOLDER · rank-s</text>
+</svg>

@@ -1,0 +1,76 @@
+.root {
+  position: absolute;
+  inset: 14px;
+  pointer-events: none;
+  padding: 14px 22px;
+  z-index: 10;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.colRight {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.tag {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  opacity: 0.6;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.h1 {
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.05;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.tele {
+  display: flex;
+  gap: 18px;
+  font-size: 10px;
+  opacity: 0.78;
+  letter-spacing: 0.15em;
+  color: var(--text);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 70px;
+}
+
+.bar {
+  height: 3px;
+  background: var(--soft);
+  position: relative;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bar > i {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+}

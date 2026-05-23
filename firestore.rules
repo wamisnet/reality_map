@@ -1,0 +1,41 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /results/{docId} {
+      // Public read: 公開ページが誰でも participantId / resultId から引ける。
+      allow read: if true;
+
+      // Only the signed-in operator may create results, and only for their own uid.
+      allow create: if request.auth != null
+        && request.resource.data.operatorUid == request.auth.uid
+        && request.resource.data.participantName is string
+        && request.resource.data.participantName.size() > 0
+        && request.resource.data.participantName.size() <= 64
+        && request.resource.data.participantKey is string
+        && request.resource.data.participantId is string
+        && request.resource.data.participantId.matches('^[a-z0-9]{6,16}$')
+        && request.resource.data.candidateName is string
+        && request.resource.data.pref is string
+        && request.resource.data.lon is number
+        && request.resource.data.lat is number;
+
+      // Results are immutable once written.
+      allow update, delete: if false;
+    }
+
+    // 候補（地点プール）— サインインオペレーターのみ読書き
+    match /candidates/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // ストリーマー配下のギフト等。サインインオペレーターのみ読取
+    match /streamers/{streamerId}/{document=**} {
+      allow read: if request.auth != null;
+      // 書き込みはサーバー側で行う想定（クライアントからは不許可）
+      allow write: if false;
+    }
+  }
+}

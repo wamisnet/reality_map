@@ -1,0 +1,47 @@
+.frame {
+  position: absolute;
+  inset: 14px;
+  pointer-events: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  z-index: 10;
+}
+
+.frame::before,
+.frame::after {
+  content: "";
+  position: absolute;
+  background: var(--primary);
+  opacity: 0.5;
+}
+
+.frame::before {
+  left: 50%;
+  top: -4px;
+  width: 1px;
+  height: 8px;
+  transform: translateX(-50%);
+}
+
+.frame::after {
+  left: 50%;
+  bottom: -4px;
+  width: 1px;
+  height: 8px;
+  transform: translateX(-50%);
+}
+
+.corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--primary);
+  border-style: solid;
+  border-width: 0;
+  opacity: 0.7;
+}
+
+.tl { top: 8px; left: 8px;     border-top-width: 1.5px; border-left-width: 1.5px;  border-top-left-radius: 6px; }
+.tr { top: 8px; right: 8px;    border-top-width: 1.5px; border-right-width: 1.5px; border-top-right-radius: 6px; }
+.bl { bottom: 8px; left: 8px;  border-bottom-width: 1.5px; border-left-width: 1.5px;  border-bottom-left-radius: 6px; }
+.br { bottom: 8px; right: 8px; border-bottom-width: 1.5px; border-right-width: 1.5px; border-bottom-right-radius: 6px; }

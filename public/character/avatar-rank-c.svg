@@ -1,0 +1,22 @@
+<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-label="avatar placeholder rank-c">
+  <defs>
+    <linearGradient id="ah5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbd5e8"/>
+      <stop offset="100%" stop-color="#d6b3e5"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="236" height="236" fill="#fff7f0" stroke="#d4b8c8" stroke-width="1.5" stroke-dasharray="5 5" rx="20"/>
+  <circle cx="120" cy="125" r="92" fill="url(#ah5)"/>
+  <circle cx="120" cy="130" r="72" fill="#fff0e4"/>
+  <path d="M 48 115 Q 50 60 120 50 Q 190 60 192 115 Q 178 90 152 90 L 142 110 L 130 88 L 120 110 L 110 88 L 98 110 L 88 90 Q 62 92 48 115 Z" fill="url(#ah5)"/>
+  <ellipse cx="92" cy="158" rx="11" ry="6" fill="#ffc9d6" opacity="0.6"/>
+  <ellipse cx="148" cy="158" rx="11" ry="6" fill="#ffc9d6" opacity="0.6"/>
+  <!-- 目を閉じてる (両目)  -->
+  <path d="M 86 142 Q 96 148 106 142" stroke="#5a3a4a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <path d="M 134 142 Q 144 148 154 142" stroke="#5a3a4a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <!-- 励まし口 -->
+  <path d="M 110 168 Q 120 173 130 168" stroke="#7a4658" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <!-- 汗 -->
+  <path d="M 168 118 Q 172 130 176 118 Q 172 126 168 118 Z" fill="#a0d8ff" stroke="#6a9ec5" stroke-width="0.8"/>
+  <text x="120" y="226" text-anchor="middle" font-size="11" font-weight="700" fill="#a0827a" font-family="sans-serif" letter-spacing="1">PLACEHOLDER · avatar-rank-c</text>
+</svg>

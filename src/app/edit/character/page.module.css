@@ -1,0 +1,217 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line, oklch(0.88 0.01 240));
+}
+
+.sectionTitle {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--primary, oklch(0.55 0.18 145));
+  margin: 0;
+}
+
+.sectionHint {
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 11.5px;
+  color: var(--text-dim, oklch(0.45 0.02 240));
+  margin: 0;
+  line-height: 1.5;
+}
+
+.sectionHint strong {
+  color: var(--text, oklch(0.2 0.02 240));
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--panel, #ffffff);
+  border: 1px solid var(--line, oklch(0.88 0.01 240));
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 8px oklch(0.2 0.02 240 / 0.04);
+}
+
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.poseLabel {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--primary, oklch(0.55 0.18 145));
+}
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.badgeCustom {
+  background: oklch(0.85 0.12 145 / 0.25);
+  color: oklch(0.42 0.18 145);
+}
+
+.badgePlaceholder {
+  background: oklch(0.92 0.01 240);
+  color: oklch(0.5 0.02 240);
+}
+
+.preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 240 / 340;
+  background:
+    linear-gradient(135deg, #fff7f0 0%, #f4ecff 100%);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview::before {
+  /* Checkerboard hint to show transparency */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(45deg, oklch(0.94 0.005 240) 25%, transparent 25%),
+    linear-gradient(-45deg, oklch(0.94 0.005 240) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, oklch(0.94 0.005 240) 75%),
+    linear-gradient(-45deg, transparent 75%, oklch(0.94 0.005 240) 75%);
+  background-size: 14px 14px;
+  background-position: 0 0, 0 7px, 7px -7px, -7px 0;
+  opacity: 0.4;
+}
+
+.previewImg {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.desc {
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-dim, oklch(0.45 0.02 240));
+  margin: 0;
+  min-height: 38px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.uploadBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.hiddenInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.hiddenInput:disabled {
+  cursor: not-allowed;
+}
+
+.pathRow {
+  font-size: 10px;
+  color: var(--text-dim, oklch(0.45 0.02 240));
+  word-break: break-all;
+}
+
+.pathCode {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: oklch(0.94 0.005 240);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--text, oklch(0.2 0.02 240));
+}
+
+.error {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(90vw, 640px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: oklch(1 0 0);
+  border: 1.5px solid var(--danger, oklch(0.55 0.22 25));
+  color: var(--danger, oklch(0.55 0.22 25));
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 10px 14px;
+  border-radius: 6px;
+  z-index: 90;
+  box-shadow: 0 4px 16px oklch(0.55 0.22 25 / 0.2);
+}
+
+.error strong {
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.errorClose {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 6px;
+  opacity: 0.7;
+}
+
+.errorClose:hover {
+  opacity: 1;
+}

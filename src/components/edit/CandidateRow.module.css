@@ -1,0 +1,228 @@
+.row {
+  display: grid;
+  grid-template-columns: 38px 1fr 1fr 1fr 80px 80px 70px 1fr 180px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--line, oklch(0.88 0.01 240));
+  background: var(--panel, oklch(1 0 0));
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.row.dirty {
+  border-color: var(--primary, oklch(0.55 0.18 145));
+  background: var(--soft, oklch(0.55 0.18 145 / 0.08));
+}
+
+.row.isNew {
+  border-color: oklch(0.65 0.18 90);
+  background: oklch(0.65 0.18 90 / 0.08);
+}
+
+.rankCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rankSelect {
+  background: oklch(1 0 0);
+  border: 1px solid var(--line, oklch(0.88 0.01 240));
+  color: var(--text, oklch(0.2 0.02 240));
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 6px;
+  appearance: none;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+}
+
+.rankSelect.s { color: oklch(0.55 0.18 90); border-color: oklch(0.55 0.18 90 / 0.8); }
+.rankSelect.a { color: var(--danger, oklch(0.55 0.22 25)); border-color: var(--danger, oklch(0.55 0.22 25)); }
+.rankSelect.b { color: oklch(0.48 0.12 230); border-color: oklch(0.48 0.12 230 / 0.7); }
+.rankSelect.c { color: oklch(0.45 0.02 80); border-color: oklch(0.45 0.02 80 / 0.55); }
+
+.numInput {
+  font-variant-numeric: tabular-nums;
+}
+
+.rowActions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.rowBtn {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 5px 10px;
+  border: 1px solid var(--primary, oklch(0.55 0.18 145));
+  background: transparent;
+  color: var(--primary, oklch(0.55 0.18 145));
+  cursor: pointer;
+}
+
+.rowBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.rowBtn:hover:not(:disabled) {
+  background: var(--primary, oklch(0.55 0.18 145));
+  color: oklch(1 0 0);
+}
+
+.rowBtnDanger {
+  border-color: var(--danger, oklch(0.55 0.22 25));
+  color: var(--danger, oklch(0.55 0.22 25));
+}
+
+.rowBtnDanger:hover:not(:disabled) {
+  background: var(--danger, oklch(0.55 0.22 25));
+  color: oklch(1 0 0);
+}
+
+/* image セル: サムネイル + URL input + アップロードボタンを1行に */
+.imageCell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  border-radius: 2px;
+  outline: 2px dashed transparent;
+  outline-offset: 2px;
+  transition: outline-color 80ms linear, background-color 80ms linear;
+}
+
+.imageCellOver {
+  outline-color: var(--primary, oklch(0.55 0.18 145));
+  background: var(--soft, oklch(0.55 0.18 145 / 0.12));
+}
+
+.imageThumb {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border: 1px solid var(--line, oklch(0.88 0.01 240));
+  background: oklch(0.96 0.01 240);
+  flex-shrink: 0;
+}
+
+.thumbStrip {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  max-width: 50%;
+  overflow-x: auto;
+}
+
+.thumbWrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.thumbX {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid oklch(1 0 0);
+  background: oklch(0 0 0 / 0.65);
+  color: oklch(1 0 0);
+  font-size: 10px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 80ms linear;
+}
+
+.thumbWrap:hover .thumbX,
+.thumbX:focus-visible {
+  opacity: 1;
+}
+
+.thumbX:hover:not(:disabled) {
+  background: var(--danger, oklch(0.55 0.22 25));
+}
+
+.thumbX:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.urlInput {
+  min-width: 0;
+}
+
+.uploadBtn {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--primary, oklch(0.55 0.18 145));
+  background: oklch(1 0 0);
+  color: var(--primary, oklch(0.55 0.18 145));
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0;
+  line-height: 1;
+}
+
+.uploadBtn:hover:not(:disabled) {
+  background: var(--primary, oklch(0.55 0.18 145));
+  color: oklch(1 0 0);
+}
+
+.uploadBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.uploadErr {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--danger, oklch(0.55 0.22 25));
+  color: oklch(1 0 0);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: help;
+}
+
+.headerRow {
+  composes: row;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line, oklch(0.88 0.01 240));
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-dim, oklch(0.45 0.02 240));
+  padding-bottom: 6px;
+}
+
+.headerRow > * {
+  text-align: left;
+}
+
+.headerRow .rankCell {
+  text-align: center;
+  justify-content: center;
+}

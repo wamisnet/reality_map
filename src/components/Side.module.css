@@ -1,0 +1,23 @@
+.side {
+  position: absolute;
+  pointer-events: auto;
+  background: var(--panel);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 11px;
+  color: var(--text);
+  z-index: 10;
+  box-shadow: 0 4px 14px rgba(170, 130, 120, 0.1);
+}
+
+.head {
+  font-size: 9.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}

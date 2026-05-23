@@ -1,0 +1,439 @@
+.panel {
+  width: 360px;
+  height: 100%;
+  background: oklch(1 0 0);
+  border-left: 1px solid oklch(0.88 0.01 240);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+  color: oklch(0.2 0.02 240);
+  overflow-y: auto;
+}
+
+.head {
+  padding: 18px 22px 12px;
+  border-bottom: 1px solid oklch(0.92 0.01 240);
+}
+
+.title {
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: oklch(0.55 0.18 145);
+  margin-bottom: 4px;
+}
+
+.sub {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: oklch(0.45 0.02 240);
+  text-transform: uppercase;
+}
+
+.body {
+  padding: 18px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.empty {
+  padding: 60px 22px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: oklch(0.5 0.02 240);
+  line-height: 1.7;
+}
+
+.coordBlock {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.coordCell {
+  background: oklch(0.97 0.005 240);
+  border: 1px solid oklch(0.9 0.01 240);
+  padding: 6px 10px;
+}
+
+.coordLabel {
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  color: oklch(0.5 0.02 240);
+  text-transform: uppercase;
+}
+
+.coordValue {
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: oklch(0.2 0.02 240);
+  margin-top: 2px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  color: oklch(0.45 0.02 240);
+  text-transform: uppercase;
+}
+
+.hint {
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  color: oklch(0.55 0.02 240);
+  margin-top: 2px;
+}
+
+.input,
+.textarea,
+.select {
+  background: oklch(1 0 0);
+  border: 1px solid oklch(0.88 0.01 240);
+  color: oklch(0.2 0.02 240);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 7px 10px;
+  outline: none;
+  width: 100%;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  border-color: oklch(0.55 0.18 145);
+  background: oklch(0.99 0.005 145 / 0.5);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.rankRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.rankBtn {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 4px;
+  border: 1px solid oklch(0.88 0.01 240);
+  background: oklch(1 0 0);
+  color: oklch(0.45 0.02 240);
+  cursor: pointer;
+}
+
+.rankBtn:hover {
+  border-color: oklch(0.55 0.18 145);
+}
+
+.rankBtn.on {
+  color: oklch(1 0 0);
+}
+
+.rankBtn.s.on { background: oklch(0.55 0.18 90); border-color: oklch(0.55 0.18 90); }
+.rankBtn.a.on { background: oklch(0.55 0.22 25); border-color: oklch(0.55 0.22 25); }
+.rankBtn.b.on { background: oklch(0.48 0.12 230); border-color: oklch(0.48 0.12 230); }
+.rankBtn.c.on { background: oklch(0.45 0.02 80); border-color: oklch(0.45 0.02 80); }
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 10px 16px;
+  border: 1px solid oklch(0.55 0.18 145);
+  background: transparent;
+  color: oklch(0.55 0.18 145);
+  cursor: pointer;
+  flex: 1;
+}
+
+.btn:hover:not(:disabled) {
+  background: oklch(0.55 0.18 145);
+  color: oklch(1 0 0);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btnPrimary {
+  background: oklch(0.55 0.18 145);
+  color: oklch(1 0 0);
+}
+
+.btnGhost {
+  border-color: oklch(0.85 0.01 240);
+  color: oklch(0.45 0.02 240);
+}
+
+.btnGhost:hover:not(:disabled) {
+  background: oklch(0.92 0.01 240);
+  color: oklch(0.2 0.02 240);
+}
+
+.btnDanger {
+  border-color: oklch(0.6 0.22 25);
+  color: oklch(0.6 0.22 25);
+}
+
+.btnDanger:hover:not(:disabled) {
+  background: oklch(0.6 0.22 25);
+  color: oklch(1 0 0);
+}
+
+.cancelEditBtn {
+  margin-top: 4px;
+  width: 100%;
+  flex: none;
+}
+
+/* 近隣ランドマーク一覧 */
+.landmarkList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid oklch(0.92 0.01 240);
+  background: oklch(0.99 0.005 240);
+}
+
+.landmarkBtn {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid oklch(0.94 0.01 240);
+  padding: 7px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: inherit;
+  color: inherit;
+}
+
+.landmarkBtn:last-child {
+  border-bottom: 0;
+}
+
+.landmarkBtn:hover:not(:disabled) {
+  background: oklch(0.96 0.02 145);
+}
+
+.landmarkBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.landmarkName {
+  font-size: 12px;
+  color: oklch(0.2 0.02 240);
+}
+
+.landmarkMeta {
+  font-size: 10px;
+  color: oklch(0.5 0.02 240);
+  letter-spacing: 0.05em;
+}
+
+/* 画像アップロード */
+.imagePreviewWrap {
+  width: 100%;
+  border: 1px solid oklch(0.9 0.01 240);
+  background: oklch(0.97 0.005 240);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.imagePreview {
+  display: block;
+  max-width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+}
+
+/* 複数サムネイル */
+.thumbList {
+  list-style: none;
+  margin: 0 0 4px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.thumbItem {
+  position: relative;
+  width: 96px;
+  height: 72px;
+  border: 1px solid oklch(0.88 0.01 240);
+  background: oklch(0.97 0.005 240);
+  overflow: hidden;
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.thumbCover {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  background: oklch(0.55 0.18 145);
+  color: oklch(1 0 0);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  pointer-events: none;
+}
+
+.thumbRemove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid oklch(1 0 0);
+  background: oklch(0 0 0 / 0.55);
+  color: oklch(1 0 0);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+}
+
+.thumbRemove:hover:not(:disabled) {
+  background: oklch(0.55 0.22 25);
+}
+
+.thumbRemove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px dashed oklch(0.82 0.01 240);
+  background: oklch(0.985 0.005 240);
+  transition: border-color 80ms linear, background-color 80ms linear;
+}
+
+.dropZoneOver {
+  border-color: oklch(0.55 0.18 145);
+  background: oklch(0.55 0.18 145 / 0.08);
+}
+
+.dropHint {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: oklch(0.5 0.02 240);
+}
+
+.dropZoneOver .dropHint {
+  color: oklch(0.4 0.14 145);
+  font-weight: 600;
+}
+
+.uploadRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fileInput {
+  font-family: inherit;
+  font-size: 11px;
+  flex: 1;
+  min-width: 0;
+}
+
+.linkBtn {
+  background: transparent;
+  border: none;
+  color: oklch(0.55 0.18 145);
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+}
+
+.linkBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 本番ビルド時の「アップロード無効」案内ボックス */
+.uploadDisabled {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px dashed oklch(0.78 0.05 80);
+  background: oklch(0.98 0.03 80);
+  border-radius: 2px;
+}
+
+.uploadDisabledTitle {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: oklch(0.45 0.12 60);
+  font-weight: 700;
+}
+
+.uploadDisabledBody {
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: oklch(0.35 0.04 60);
+  letter-spacing: 0.02em;
+}
+
+.uploadDisabledBody code {
+  font-family: var(--font-mono);
+  background: oklch(0.95 0.02 80);
+  padding: 0 4px;
+  border-radius: 2px;
+}

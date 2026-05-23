@@ -1,0 +1,29 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #fffaf3;
+  color: #3a2a25;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent horizontal scroll caused by decorative blobs that extend past the edge,
+     while leaving vertical scroll alone so mobile users can scroll long pages. */
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Leaflet attribution tweaks (CRT/HUD aesthetic) */
+.leaflet-control-attribution {
+  background: oklch(0 0 0 / 0.6) !important;
+  color: oklch(1 0 0 / 0.7) !important;
+  font-size: 9px !important;
+  padding: 1px 6px !important;
+}
+
+.leaflet-control-attribution a {
+  color: oklch(1 0 0 / 0.85) !important;
+}

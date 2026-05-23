@@ -1,0 +1,138 @@
+/* Rank colors — 他のコンポーネントもこの CSS Module から composes してもいい */
+.root {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.lg {
+  width: 56px;
+  height: 56px;
+  font-size: 26px;
+}
+
+.sm {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+}
+
+.shape {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.label {
+  position: relative;
+  z-index: 1;
+  color: oklch(0.08 0.02 240);
+  text-shadow: 0 1px 1px oklch(1 0 0 / 0.3);
+}
+
+/* ─── S: ゴールド・星形 + パーティクル ──────────────────────── */
+.rankS {
+  color: oklch(0.95 0.05 90);
+}
+.rankS .shape {
+  filter: drop-shadow(0 0 10px oklch(0.85 0.18 90)) drop-shadow(0 0 3px oklch(0.85 0.18 90));
+}
+.rankS .label {
+  color: oklch(0.15 0.04 70);
+}
+
+/* ─── A: レッド・盾形 ──────────────────────────────────────── */
+.rankA {
+  color: var(--danger, oklch(0.7 0.22 25));
+}
+.rankA .shape {
+  filter: drop-shadow(0 0 6px var(--danger, oklch(0.7 0.22 25)));
+}
+.rankA .label {
+  color: oklch(0.97 0.04 80);
+}
+
+/* ─── B: シルバー・角形 ────────────────────────────────────── */
+.rankB {
+  color: oklch(0.78 0.05 230);
+}
+.rankB .shape {
+  filter: drop-shadow(0 0 4px oklch(0.78 0.05 230));
+}
+.rankB .label {
+  color: oklch(0.15 0.04 230);
+}
+
+/* ─── C: グレー・小ドット ──────────────────────────────────── */
+.rankC {
+  color: oklch(0.55 0.02 80);
+}
+.rankC .shape {
+  opacity: 0.85;
+}
+.rankC .label {
+  color: oklch(0.95 0.02 80);
+}
+
+/* Pop アニメーション (revealRank で trigger) */
+.pop {
+  animation: rankPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes rankPop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* S 専用パーティクル (CSS keyframes のみで実装) */
+.particles {
+  position: absolute;
+  inset: -8px;
+  pointer-events: none;
+  z-index: 2;
+}
+.particles span {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: oklch(0.95 0.15 90);
+  border-radius: 50%;
+  box-shadow: 0 0 6px oklch(0.95 0.15 90);
+  animation: spark 1.4s linear infinite;
+  opacity: 0;
+}
+.particles span:nth-child(1) { top: 0; left: 50%; animation-delay: 0s; }
+.particles span:nth-child(2) { top: 50%; left: 100%; animation-delay: 0.18s; }
+.particles span:nth-child(3) { top: 100%; left: 50%; animation-delay: 0.36s; }
+.particles span:nth-child(4) { top: 50%; left: 0; animation-delay: 0.54s; }
+.particles span:nth-child(5) { top: 10%; left: 90%; animation-delay: 0.72s; }
+.particles span:nth-child(6) { top: 90%; left: 10%; animation-delay: 0.9s; }
+
+@keyframes spark {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+  }
+}

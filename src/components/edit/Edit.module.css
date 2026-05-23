@@ -1,0 +1,196 @@
+/*
+ * /edit 系ページのライトテーマ。
+ * メインのオペコンソール (ダーク HUD) と切り離した、白基調の編集 UI。
+ * ここで定義した CSS 変数を CandidateRow / ModeCard / EditNav の各 module.css が
+ * `var(--primary)` 等で参照する（フォールバックは付けてあるが、このページ配下では上書きされる）。
+ */
+.page {
+  --primary: oklch(0.55 0.18 145);
+  --danger: oklch(0.55 0.22 25);
+  --soft: oklch(0.55 0.18 145 / 0.18);
+  --line: oklch(0.88 0.01 240);
+  --text: oklch(0.2 0.02 240);
+  --text-dim: oklch(0.45 0.02 240);
+  --panel: oklch(1 0 0);
+  --bg: oklch(0.985 0.003 240);
+  --bg-elev: oklch(0.96 0.005 240);
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  padding: 24px 28px 80px;
+}
+
+.heading {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin: 18px 0 20px;
+}
+
+.title {
+  font-size: 18px;
+  letter-spacing: 0.32em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.subtitle {
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 8px 16px;
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: oklch(1 0 0);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btnPrimary {
+  background: var(--primary);
+  color: oklch(1 0 0);
+}
+
+.btnDanger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btnDanger:hover:not(:disabled) {
+  background: var(--danger);
+  color: oklch(1 0 0);
+}
+
+.input {
+  background: oklch(1 0 0);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 5px 8px;
+  outline: none;
+  width: 100%;
+}
+
+.input:focus {
+  border-color: var(--primary);
+  background: oklch(0.99 0.005 145 / 0.5);
+}
+
+.label {
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
+.fallbackNotice {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-left: 2px solid var(--primary);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: 10.5px;
+  letter-spacing: 0.15em;
+}
+
+.note {
+  margin: 0 0 20px;
+  padding: 14px 18px;
+  border-left: 2px solid var(--primary);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+  font-family: var(--font-ui), system-ui, sans-serif;
+}
+
+.note p {
+  margin: 0 0 8px;
+}
+
+.note p:last-child {
+  margin-bottom: 0;
+}
+
+.note ul {
+  margin: 6px 0 10px;
+  padding-left: 20px;
+}
+
+.note li {
+  margin: 4px 0;
+}
+
+.note strong {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.note code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 1px 5px;
+  background: oklch(0.92 0.01 240);
+  border-radius: 2px;
+}
+
+.note em {
+  font-style: italic;
+  color: var(--text-dim);
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border: 1px solid var(--primary);
+  background: oklch(1 0 0);
+  color: var(--primary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  box-shadow: 0 4px 12px oklch(0.2 0.02 240 / 0.08);
+  z-index: 80;
+}

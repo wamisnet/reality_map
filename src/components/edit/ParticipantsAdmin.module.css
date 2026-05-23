@@ -1,0 +1,233 @@
+.templateBox {
+  margin: 8px 0 24px;
+  padding: 14px 18px;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--primary);
+}
+
+.templateHead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.templateLabel {
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.templateHint {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.templateHint code {
+  font-family: var(--font-mono);
+  background: oklch(0.92 0.01 240);
+  padding: 1px 5px;
+  border-radius: 2px;
+  color: var(--text);
+}
+
+.templateReset {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-dim);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.templateReset:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.templateInput {
+  width: 100%;
+  background: oklch(1 0 0);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  padding: 8px 10px;
+  outline: none;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.templateInput:focus {
+  border-color: var(--primary);
+}
+
+.templatePreviewLabel {
+  margin-top: 10px;
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.templatePreview {
+  margin: 0;
+  padding: 10px 12px;
+  background: oklch(1 0 0);
+  border: 1px dashed var(--line);
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* ─── 参加者リスト ────────────────────────────────────────── */
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.headerRow {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 0.6fr 1.2fr 2fr;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 0.6fr 1.2fr 2fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.name {
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.idCell {
+  font-family: var(--font-mono);
+}
+
+.id {
+  background: oklch(0.94 0.01 240);
+  padding: 2px 6px;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  border-radius: 2px;
+}
+
+.numCell {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.unit {
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+  margin-left: 2px;
+}
+
+.dateCell {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.copyBtn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 6px 10px;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: oklch(1 0 0);
+  cursor: pointer;
+}
+
+.copyBtn:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.copyBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.copyBtnGhost {
+  background: transparent;
+  color: var(--primary);
+}
+
+.copyBtnGhost:hover:not(:disabled) {
+  background: var(--soft);
+}
+
+.openLink {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+  padding: 6px 4px;
+}
+
+.openLink:hover {
+  color: var(--primary);
+}
+
+@media (max-width: 880px) {
+  .headerRow,
+  .row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .headerRow {
+    display: none;
+  }
+}

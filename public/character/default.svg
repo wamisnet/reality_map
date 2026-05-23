@@ -1,0 +1,42 @@
+<svg viewBox="0 0 240 340" xmlns="http://www.w3.org/2000/svg" aria-label="character placeholder default">
+  <defs>
+    <linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbd5e8"/>
+      <stop offset="100%" stop-color="#d6b3e5"/>
+    </linearGradient>
+    <linearGradient id="dress" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff7d6"/>
+      <stop offset="100%" stop-color="#ffd6c2"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="236" height="336" fill="#fff7f0" stroke="#d4b8c8" stroke-width="1.5" stroke-dasharray="5 5" rx="14"/>
+  <!-- Twin tails (back) -->
+  <ellipse cx="48" cy="200" rx="22" ry="68" fill="url(#hair)" transform="rotate(-12 48 200)"/>
+  <ellipse cx="192" cy="200" rx="22" ry="68" fill="url(#hair)" transform="rotate(12 192 200)"/>
+  <!-- Body / dress -->
+  <path d="M 70 260 Q 75 200 120 195 Q 165 200 170 260 L 175 305 L 65 305 Z" fill="url(#dress)" stroke="#e8b8b8" stroke-width="1.2"/>
+  <!-- Neck -->
+  <rect x="108" y="180" width="24" height="22" rx="5" fill="#ffeadd"/>
+  <!-- Head -->
+  <circle cx="120" cy="135" r="62" fill="#fff0e4"/>
+  <!-- Hair front -->
+  <path d="M 62 132 Q 60 80 120 65 Q 180 80 178 132 Q 168 100 145 100 L 138 120 L 128 100 L 118 122 L 108 100 L 95 120 L 88 100 Q 72 102 62 132 Z" fill="url(#hair)"/>
+  <!-- Side bangs -->
+  <path d="M 60 125 Q 56 165 70 195" fill="url(#hair)" opacity="0.92"/>
+  <path d="M 180 125 Q 184 165 170 195" fill="url(#hair)" opacity="0.92"/>
+  <!-- Cheeks -->
+  <ellipse cx="88" cy="148" rx="10" ry="6" fill="#ffc9d6" opacity="0.65"/>
+  <ellipse cx="152" cy="148" rx="10" ry="6" fill="#ffc9d6" opacity="0.65"/>
+  <!-- Eyes -->
+  <ellipse cx="96" cy="138" rx="7" ry="9" fill="#5a3a4a"/>
+  <ellipse cx="144" cy="138" rx="7" ry="9" fill="#5a3a4a"/>
+  <circle cx="98" cy="135" r="2.4" fill="#fff"/>
+  <circle cx="146" cy="135" r="2.4" fill="#fff"/>
+  <!-- Smile -->
+  <path d="M 108 162 Q 120 170 132 162" stroke="#7a4658" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <!-- Ribbon -->
+  <path d="M 78 92 L 72 102 L 86 100 Z M 78 92 L 88 88 L 86 100 Z" fill="#ff9fb6"/>
+  <circle cx="83" cy="96" r="2.5" fill="#ffd4e0"/>
+  <!-- Label -->
+  <text x="120" y="328" text-anchor="middle" font-size="11" font-weight="700" fill="#a0827a" font-family="sans-serif" letter-spacing="2">PLACEHOLDER · default</text>
+</svg>

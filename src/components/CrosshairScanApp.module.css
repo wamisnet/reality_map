@@ -1,0 +1,90 @@
+.root {
+  /* Light skin: white + warm pastel */
+  --bg: #fffaf3;
+  --panel: rgba(255, 255, 255, 0.85);
+  --line: rgba(170, 130, 120, 0.18);
+  --text: #3a2a25;
+  --dim: rgba(90, 70, 64, 0.55);
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* Legacy dark skins (kept for /edit etc.) — restored when explicitly requested */
+.root[data-theme="green"],
+.root[data-theme="amber"],
+.root[data-theme="red"],
+.root[data-theme="cyan"] {
+  --bg: oklch(0.075 0.025 240);
+  --panel: oklch(0.1 0.025 240 / 0.78);
+  --line: oklch(0.95 0.02 230 / 0.12);
+  --text: oklch(0.95 0.03 80);
+  --dim: oklch(0.7 0.04 80 / 0.55);
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.scanline {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 3px,
+    oklch(1 0 0 / 0.02) 3px,
+    oklch(1 0 0 / 0.02) 4px
+  );
+}
+
+.root[data-theme="light"] .scanline {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 4px,
+    rgba(170, 130, 120, 0.025) 4px,
+    rgba(170, 130, 120, 0.025) 5px
+  );
+}
+
+.flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  background: var(--danger);
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+
+.root[data-theme="light"] .flash {
+  background: radial-gradient(ellipse at center, #ff9fb6 0%, #ffd66d 60%, transparent 100%);
+  mix-blend-mode: multiply;
+}
+
+.flashGo {
+  animation: flash 0.55s ease-out forwards;
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 0;
+  }
+}
