@@ -275,6 +275,34 @@ export async function fetchResultsByParticipantId(
   return snap.docs.map(d => decodeDoc(d.id, d.data() as Record<string, unknown>));
 }
 
+/**
+ * 参加者の結果リストから「ランク別のユニーク当選候補数」を集計する。
+ * ガチャの性質上同じ候補が複数回当たるので、candidateId で重複排除する。
+ * 古い結果には candidateId が無いので、フォールバックとして pref+candidateName を
+ * 安定キーとして扱う (改名されると別物として数えてしまうが、null よりはマシ)。
+ */
+export function computeRankHits(
+  results: ReadonlyArray<ResultDoc>,
+): Record<Rank, number> {
+  const seenPerRank: Record<Rank, Set<string>> = {
+    S: new Set(),
+    A: new Set(),
+    B: new Set(),
+    C: new Set(),
+  };
+  for (const r of results) {
+    if (!r.rank) continue;
+    const key = r.candidateId ?? `legacy:${r.pref}|${r.candidateName}`;
+    seenPerRank[r.rank].add(key);
+  }
+  return {
+    S: seenPerRank.S.size,
+    A: seenPerRank.A.size,
+    B: seenPerRank.B.size,
+    C: seenPerRank.C.size,
+  };
+}
+
 export async function fetchResultById(resultId: string): Promise<ResultDoc | null> {
   if (!resultId) return null;
   const db = getDb();

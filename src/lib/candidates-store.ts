@@ -3,15 +3,18 @@ import {
   collection,
   deleteDoc,
   doc,
+  getCountFromServer,
   getDoc,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   updateDoc,
+  where,
   type Timestamp,
   type Unsubscribe,
 } from "firebase/firestore";
+import { unstable_cache } from "next/cache";
 import { getDb } from "./firebase";
 import type { EditableCandidate, Rank } from "@/types";
 
@@ -164,3 +167,35 @@ export async function deleteCandidate(id: string): Promise<void> {
   const db = getDb();
   await deleteDoc(doc(db, COLLECTION, id));
 }
+
+export type CandidateRankCounts = Record<Rank, number>;
+
+/**
+ * 候補ドキュメントの全件数をランク別に集計する。
+ * Firestore の getCountFromServer (4回 / S A B C) を使うので
+ * 候補本体は転送されず、課金も 1000 件あたり 1 read で済む。
+ */
+async function fetchCandidateRankCountsLive(): Promise<CandidateRankCounts> {
+  const db = getDb();
+  const col = collection(db, COLLECTION);
+  const ranks = VALID_RANKS;
+  const snaps = await Promise.all(
+    ranks.map(r => getCountFromServer(query(col, where("rank", "==", r)))),
+  );
+  const counts = { S: 0, A: 0, B: 0, C: 0 } as CandidateRankCounts;
+  ranks.forEach((r, i) => {
+    counts[r] = snaps[i].data().count;
+  });
+  return counts;
+}
+
+/**
+ * 公開ページで使う集計関数。ページ表示のたびに 4 read が走らないよう
+ * Next.js のサーバキャッシュ (revalidate=300s) でラップする。
+ * 候補が変わってもキャッシュは最大 5 分残るが、母数の表示としては許容範囲。
+ */
+export const fetchCandidateRankCounts = unstable_cache(
+  fetchCandidateRankCountsLive,
+  ["candidate-rank-counts:v1"],
+  { revalidate: 300, tags: ["candidate-counts"] },
+);

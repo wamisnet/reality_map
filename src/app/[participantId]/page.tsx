@@ -2,9 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Character from "@/components/public/Character";
+import ParticipantHitStats from "@/components/public/ParticipantHitStats";
 import PublicPageHeader from "@/components/public/PublicPageHeader";
 import RankLegend from "@/components/RankLegend";
-import { fetchResultsByParticipantId, isValidParticipantId } from "@/lib/results";
+import { fetchCandidateRankCounts } from "@/lib/candidates-store";
+import {
+  computeRankHits,
+  fetchResultsByParticipantId,
+  isValidParticipantId,
+} from "@/lib/results";
 import styles from "./page.module.css";
 
 interface PageProps {
@@ -59,8 +65,12 @@ export default async function ParticipantPage({ params }: PageProps) {
   const { participantId } = await params;
   if (!isValidParticipantId(participantId)) notFound();
 
-  const results = await fetchResultsByParticipantId(participantId);
+  const [results, totals] = await Promise.all([
+    fetchResultsByParticipantId(participantId),
+    fetchCandidateRankCounts().catch(() => ({ S: 0, A: 0, B: 0, C: 0 })),
+  ]);
   const participantName = results[0]?.participantName ?? null;
+  const hits = computeRankHits(results);
 
   return (
     <div className={styles.root}>
@@ -100,6 +110,7 @@ export default async function ParticipantPage({ params }: PageProps) {
           </p>
         ) : (
           <>
+            <ParticipantHitStats hits={hits} totals={totals} />
             <div className={styles.legendWrap}>
               <RankLegend variant="compact" title="ランクの意味" />
             </div>
