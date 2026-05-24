@@ -161,6 +161,82 @@
   gap: 8px;
 }
 
+.whoLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.rowCheck {
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--primary, #d98a9b);
+  margin: 0;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.group:has(.groupHead) {
+  gap: 4px;
+  padding: 6px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--line);
+}
+
+.groupHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 6px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.groupSelectAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  min-width: 0;
+  flex: 1;
+}
+
+.groupSelectAll input[type="checkbox"] {
+  accent-color: var(--primary, #d98a9b);
+  margin: 0;
+}
+
+.groupName {
+  font-family: var(--font-jp);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--primary, #d98a9b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.groupMeta {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 9.5px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.selected {
+  background: rgba(217, 138, 155, 0.12);
+  border-color: var(--primary, #d98a9b);
+}
+
 .name {
   font-family: var(--font-jp);
   font-size: 13px;

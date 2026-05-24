@@ -26,7 +26,8 @@ export interface FireFromGiftArgs {
 interface Props {
   gifts: ReadonlyArray<GiftDoc>;
   busy: boolean;
-  onFire: (args: FireFromGiftArgs) => void;
+  /** 単発抽選 = 長さ1の配列、一括抽選 = N件の配列。親側で順次キュー実行する。 */
+  onFire: (sessions: FireFromGiftArgs[]) => void;
   loading: boolean;
   error: string | null;
 }
@@ -40,6 +41,17 @@ interface EditState {
   countDirty: boolean;
   modeDirty: boolean;
   treatAsNewIdentity: boolean;
+}
+
+interface GiftGroup {
+  /** user_raw (空文字なら "_unknown" 集約) */
+  userRaw: string;
+  /** 表示用 display (最新ギフトのもの) */
+  displayName: string;
+  /** 全ギフト (新→古) */
+  items: GiftDoc[];
+  /** 一括抽選候補 = 未処理 & amount >= 10 */
+  pendingItems: GiftDoc[];
 }
 
 function pad2(n: number): string {
@@ -93,6 +105,35 @@ function initialEdit(gift: GiftDoc, fallbackModeId: string): EditState {
   };
 }
 
+/**
+ * gifts を user_raw でグループ化。入力は at desc 前提なので、各グループ内も at desc。
+ * グループ自体の並び順は「最新ギフトを持つグループが上」(= 入力の出現順)。
+ */
+function groupGifts(gifts: ReadonlyArray<GiftDoc>): GiftGroup[] {
+  const map = new Map<string, GiftDoc[]>();
+  const order: string[] = [];
+  for (const g of gifts) {
+    const key = g.user_raw || "_unknown";
+    if (!map.has(key)) {
+      map.set(key, []);
+      order.push(key);
+    }
+    map.get(key)!.push(g);
+  }
+  return order.map(key => {
+    const items = map.get(key)!;
+    const newest = items[0];
+    return {
+      userRaw: key,
+      displayName: newest?.user_display || newest?.user_raw || key,
+      items,
+      pendingItems: items.filter(
+        g => g.lottery_processed_at === null && g.amount >= 10,
+      ),
+    };
+  });
+}
+
 export default function GiftQueuePanel({
   gifts,
   busy,
@@ -105,6 +146,9 @@ export default function GiftQueuePanel({
   const [collapsed, setCollapsed] = useState(false);
   const [sinceMs, setSinceMs] = useState<number | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
 
   // localStorage から復元 (mount 後にだけ走らせて SSR とずらさない)
   useEffect(() => {
@@ -149,6 +193,27 @@ export default function GiftQueuePanel({
     return gifts.filter(g => g.at !== null && g.at.getTime() >= sinceMs);
   }, [gifts, sinceMs]);
 
+  const groups = useMemo(() => groupGifts(visible), [visible]);
+
+  // 「実際に有効な選択 ID」を read 時に derive。
+  // visible から消えた / processed 化した ID は除外して扱う (selectedIds 本体は触らない)。
+  const effectiveSelected = useMemo<ReadonlySet<string>>(() => {
+    if (selectedIds.size === 0) return selectedIds;
+    const eligible = new Set<string>();
+    for (const g of visible) {
+      if (g.lottery_processed_at === null && g.amount >= 10) {
+        eligible.add(g.id);
+      }
+    }
+    const next = new Set<string>();
+    let changed = false;
+    selectedIds.forEach(id => {
+      if (eligible.has(id)) next.add(id);
+      else changed = true;
+    });
+    return changed ? next : selectedIds;
+  }, [selectedIds, visible]);
+
   function getEdit(g: GiftDoc): EditState {
     return edits[g.id] ?? initialEdit(g, fallbackModeId);
   }
@@ -178,6 +243,26 @@ export default function GiftQueuePanel({
     });
   }
 
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function setGroupSelection(group: GiftGroup, on: boolean) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      for (const g of group.pendingItems) {
+        if (on) next.add(g.id);
+        else next.delete(g.id);
+      }
+      return next;
+    });
+  }
+
   function fire(g: GiftDoc, edit: EditState, opts: { isReDraw?: boolean } = {}) {
     if (busy) return;
     const name = edit.name.trim();
@@ -189,16 +274,53 @@ export default function GiftQueuePanel({
       );
       if (!ok) return;
     }
-    onFire({
-      giftId: g.id,
-      giftUserRaw: g.user_raw || null,
-      giftAmount: edit.amount,
-      giftName: edit.giftName.trim(),
-      giftSource: g.source,
-      displayName: name,
-      modeId: edit.modeId,
-      count: Math.max(1, Math.min(50, Math.floor(edit.count))),
-      treatAsNewIdentity: edit.treatAsNewIdentity,
+    onFire([
+      {
+        giftId: g.id,
+        giftUserRaw: g.user_raw || null,
+        giftAmount: edit.amount,
+        giftName: edit.giftName.trim(),
+        giftSource: g.source,
+        displayName: name,
+        modeId: edit.modeId,
+        count: Math.max(1, Math.min(50, Math.floor(edit.count))),
+        treatAsNewIdentity: edit.treatAsNewIdentity,
+      },
+    ]);
+  }
+
+  /**
+   * グループ内で選択されたギフトを「各々が個別 fire されたのと同じ挙動」で順次回す。
+   * - サム合算はしない。各ギフトの amount / 推奨 (or 編集) で1セッションずつ
+   * - 親側がキューに積んで自動で順次実行する
+   * - 並び: 古→新 (FIFO)。先に届いたギフトから処理する
+   */
+  function fireBatch(group: GiftGroup) {
+    if (busy) return;
+    const selectedInGroup = group.items.filter(g => effectiveSelected.has(g.id));
+    if (selectedInGroup.length < 2) return;
+    // 入力は at desc (新→古)。古いほうから流したいので reverse する。
+    const ordered = [...selectedInGroup].reverse();
+    const sessions: FireFromGiftArgs[] = ordered.map(g => {
+      const edit = getEdit(g);
+      const name = edit.name.trim() || g.user_display || g.user_raw;
+      return {
+        giftId: g.id,
+        giftUserRaw: g.user_raw || null,
+        giftAmount: edit.amount,
+        giftName: edit.giftName.trim(),
+        giftSource: g.source,
+        displayName: name,
+        modeId: edit.modeId,
+        count: Math.max(1, Math.min(50, Math.floor(edit.count))),
+        treatAsNewIdentity: edit.treatAsNewIdentity,
+      };
+    });
+    onFire(sessions);
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      selectedInGroup.forEach(g => next.delete(g.id));
+      return next;
     });
   }
 
@@ -274,202 +396,298 @@ export default function GiftQueuePanel({
       )}
 
       {!collapsed && (
-      <div className={styles.list}>
-        {visible.map(g => {
-          const edit = getEdit(g);
-          const rec = recommendedFromAmount(edit.amount);
-          const isProcessed = g.lottery_processed_at !== null;
-          const isOpen = openId === g.id;
-          const tooSmall = edit.amount < 10;
-          const canFire = !busy && !tooSmall && edit.name.trim().length > 0;
-          const displayName = g.user_display || g.user_raw;
-          return (
-            <div
-              key={g.id}
-              className={`${styles.row} ${isProcessed ? styles.processed : ""}`}
-            >
-              <div className={styles.summary}>
-                <div className={styles.who}>
-                  <span className={styles.name}>{displayName}</span>
-                  <span className={styles.stamp}>
-                    <span className={styles.stampDate}>{fmtDate(g.at)}</span>
-                    <span className={styles.stampTime}>{fmtTime(g.at)}</span>
-                  </span>
-                </div>
-                <div className={styles.gift}>
-                  <span className={styles.giftName}>{g.gift_name || "—"}</span>
-                  <span className={styles.amount}>
-                    {g.amount}
-                    <span className={styles.unit}>C</span>
-                  </span>
-                  {g.source === "manual" && (
-                    <span className={styles.manualTag}>MANUAL</span>
-                  )}
-                  {isProcessed && (
-                    <span className={styles.doneTag}>DONE</span>
-                  )}
-                  {tooSmall && (
-                    <span className={styles.skipTag}>対象外</span>
-                  )}
-                </div>
-                <div className={styles.actions}>
-                  {!isProcessed && (
+        <div className={styles.list}>
+          {groups.map(group => {
+            const selectedInGroup = group.items.filter(g =>
+              effectiveSelected.has(g.id),
+            );
+            const sumSelected = selectedInGroup.reduce(
+              (acc, g) => acc + g.amount,
+              0,
+            );
+            // 一括バーはユーザがチェックを付けたときだけ表示 (基本は1個ずつ抽選する前提)
+            const showGroupHead = selectedInGroup.length >= 1;
+            const allSelected =
+              group.pendingItems.length > 0 &&
+              selectedInGroup.length === group.pendingItems.length;
+            const canBatchFire = !busy && selectedInGroup.length >= 2;
+
+            return (
+              <div key={group.userRaw} className={styles.group}>
+                {showGroupHead && (
+                  <div className={styles.groupHead}>
+                    <label className={styles.groupSelectAll}>
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onChange={e =>
+                          setGroupSelection(group, e.target.checked)
+                        }
+                      />
+                      <span className={styles.groupName}>
+                        {group.displayName}
+                      </span>
+                      <span className={styles.groupMeta}>
+                        {selectedInGroup.length > 0
+                          ? `${selectedInGroup.length}件 / ${sumSelected}C`
+                          : `${group.pendingItems.length}件 未処理`}
+                      </span>
+                    </label>
                     <button
                       type="button"
                       className={`${styles.btn} ${styles.btnPrimary}`}
-                      disabled={!canFire}
-                      onClick={() => fire(g, edit)}
+                      disabled={!canBatchFire}
+                      onClick={() => fireBatch(group)}
                       title={
-                        rec
-                          ? `推奨: ${modeNameOf(rec.modeId)} × ${rec.count}`
-                          : "対象外 (10C 未満)"
+                        canBatchFire
+                          ? `${selectedInGroup.length}件を順次抽選 (各ギフトを個別 fire と同じ条件で実行)`
+                          : "2件以上選択してください"
                       }
                     >
-                      <span className={styles.btnAction}>抽選</span>
-                      {tooSmall ? (
-                        <span className={styles.btnMeta}>対象外</span>
-                      ) : (
+                      <span className={styles.btnAction}>一括抽選</span>
+                      {selectedInGroup.length >= 2 && (
                         <span className={styles.btnMeta}>
-                          <span className={styles.btnMode}>
-                            {modeNameOf(edit.modeId)}
+                          <span className={styles.btnTimes}>
+                            ×{selectedInGroup.length}
                           </span>
-                          <span className={styles.btnTimes}>×{edit.count}</span>
                         </span>
                       )}
                     </button>
-                  )}
-                  {isProcessed && (
-                    <button
-                      type="button"
-                      className={`${styles.btn} ${styles.btnReDraw}`}
-                      disabled={busy || tooSmall}
-                      onClick={() => fire(g, edit, { isReDraw: true })}
-                      title={
-                        tooSmall
-                          ? "対象外 (10C 未満)"
-                          : `${modeNameOf(edit.modeId)} × ${edit.count} で再抽選`
-                      }
-                    >
-                      <span className={styles.btnAction}>再抽選</span>
-                      {!tooSmall && (
-                        <span className={styles.btnMeta}>
-                          <span className={styles.btnMode}>
-                            {modeNameOf(edit.modeId)}
-                          </span>
-                          <span className={styles.btnTimes}>×{edit.count}</span>
-                        </span>
-                      )}
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className={`${styles.btn} ${styles.btnGhost}`}
-                    onClick={() => setOpenId(isOpen ? null : g.id)}
-                  >
-                    {isOpen ? "閉じる" : "編集"}
-                  </button>
-                </div>
-              </div>
+                  </div>
+                )}
 
-              {isOpen && (
-                <div className={styles.editor}>
-                  <div className={styles.editGrid}>
-                    <label className={styles.field}>
-                      <span className={styles.label}>表示名</span>
-                      <input
-                        type="text"
-                        className={styles.input}
-                        value={edit.name}
-                        onChange={e => patchEdit(g, { name: e.target.value })}
-                        maxLength={64}
-                      />
-                    </label>
-                    <label className={styles.field}>
-                      <span className={styles.label}>コイン</span>
-                      <input
-                        type="number"
-                        className={`${styles.input} ${styles.num}`}
-                        value={edit.amount}
-                        min={0}
-                        max={100000}
-                        onChange={e => {
-                          const n = Number(e.target.value);
-                          patchEdit(g, {
-                            amount: Number.isFinite(n) ? n : 0,
-                          });
-                        }}
-                      />
-                    </label>
-                    <label className={styles.field}>
-                      <span className={styles.label}>ギフト名</span>
-                      <input
-                        type="text"
-                        className={styles.input}
-                        value={edit.giftName}
-                        onChange={e => patchEdit(g, { giftName: e.target.value })}
-                        maxLength={64}
-                      />
-                    </label>
-                    <label className={styles.field}>
-                      <span className={styles.label}>回数</span>
-                      <input
-                        type="number"
-                        className={`${styles.input} ${styles.num}`}
-                        value={edit.count}
-                        min={1}
-                        max={50}
-                        onChange={e => {
-                          const n = Number(e.target.value);
-                          patchEdit(g, {
-                            count: Number.isFinite(n) ? n : 1,
-                            countDirty: true,
-                          });
-                        }}
-                      />
-                    </label>
-                    <label className={styles.field}>
-                      <span className={styles.label}>モード</span>
-                      <select
-                        className={`${styles.input} ${styles.select}`}
-                        value={edit.modeId}
-                        onChange={e => patchEdit(g, {
-                          modeId: e.target.value,
-                          modeDirty: true,
-                        })}
-                      >
-                        {MODELS.map((m: Mode) => (
-                          <option key={m.id} value={m.id}>
-                            {m.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-                  <div className={styles.editFoot}>
-                    <label className={styles.checkRow}>
-                      <input
-                        type="checkbox"
-                        checked={edit.treatAsNewIdentity}
-                        onChange={e =>
-                          patchEdit(g, { treatAsNewIdentity: e.target.checked })
-                        }
-                      />
-                      <span>別人として記録 (新規ID)</span>
-                    </label>
-                    <button
-                      type="button"
-                      className={`${styles.btn} ${styles.btnGhost}`}
-                      onClick={() => resetEdit(g)}
+                {group.items.map(g => {
+                  const edit = getEdit(g);
+                  const rec = recommendedFromAmount(edit.amount);
+                  const isProcessed = g.lottery_processed_at !== null;
+                  const isOpen = openId === g.id;
+                  const tooSmall = edit.amount < 10;
+                  const canFire =
+                    !busy && !tooSmall && edit.name.trim().length > 0;
+                  const displayName = g.user_display || g.user_raw;
+                  const selectable = !isProcessed && g.amount >= 10;
+                  const isSelected = effectiveSelected.has(g.id);
+                  return (
+                    <div
+                      key={g.id}
+                      className={`${styles.row} ${isProcessed ? styles.processed : ""} ${isSelected ? styles.selected : ""}`}
                     >
-                      推奨値に戻す
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                      <div className={styles.summary}>
+                        <div className={styles.who}>
+                          <div className={styles.whoLeft}>
+                            {selectable && (
+                              <input
+                                type="checkbox"
+                                className={styles.rowCheck}
+                                checked={isSelected}
+                                onChange={() => toggleSelect(g.id)}
+                                aria-label="一括抽選に含める"
+                              />
+                            )}
+                            <span className={styles.name}>{displayName}</span>
+                          </div>
+                          <span className={styles.stamp}>
+                            <span className={styles.stampDate}>
+                              {fmtDate(g.at)}
+                            </span>
+                            <span className={styles.stampTime}>
+                              {fmtTime(g.at)}
+                            </span>
+                          </span>
+                        </div>
+                        <div className={styles.gift}>
+                          <span className={styles.giftName}>
+                            {g.gift_name || "—"}
+                          </span>
+                          <span className={styles.amount}>
+                            {g.amount}
+                            <span className={styles.unit}>C</span>
+                          </span>
+                          {g.source === "manual" && (
+                            <span className={styles.manualTag}>MANUAL</span>
+                          )}
+                          {isProcessed && (
+                            <span className={styles.doneTag}>DONE</span>
+                          )}
+                          {tooSmall && (
+                            <span className={styles.skipTag}>対象外</span>
+                          )}
+                        </div>
+                        <div className={styles.actions}>
+                          {!isProcessed && (
+                            <button
+                              type="button"
+                              className={`${styles.btn} ${styles.btnPrimary}`}
+                              disabled={!canFire}
+                              onClick={() => fire(g, edit)}
+                              title={
+                                rec
+                                  ? `推奨: ${modeNameOf(rec.modeId)} × ${rec.count}`
+                                  : "対象外 (10C 未満)"
+                              }
+                            >
+                              <span className={styles.btnAction}>抽選</span>
+                              {tooSmall ? (
+                                <span className={styles.btnMeta}>対象外</span>
+                              ) : (
+                                <span className={styles.btnMeta}>
+                                  <span className={styles.btnMode}>
+                                    {modeNameOf(edit.modeId)}
+                                  </span>
+                                  <span className={styles.btnTimes}>
+                                    ×{edit.count}
+                                  </span>
+                                </span>
+                              )}
+                            </button>
+                          )}
+                          {isProcessed && (
+                            <button
+                              type="button"
+                              className={`${styles.btn} ${styles.btnReDraw}`}
+                              disabled={busy || tooSmall}
+                              onClick={() => fire(g, edit, { isReDraw: true })}
+                              title={
+                                tooSmall
+                                  ? "対象外 (10C 未満)"
+                                  : `${modeNameOf(edit.modeId)} × ${edit.count} で再抽選`
+                              }
+                            >
+                              <span className={styles.btnAction}>再抽選</span>
+                              {!tooSmall && (
+                                <span className={styles.btnMeta}>
+                                  <span className={styles.btnMode}>
+                                    {modeNameOf(edit.modeId)}
+                                  </span>
+                                  <span className={styles.btnTimes}>
+                                    ×{edit.count}
+                                  </span>
+                                </span>
+                              )}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className={`${styles.btn} ${styles.btnGhost}`}
+                            onClick={() =>
+                              setOpenId(isOpen ? null : g.id)
+                            }
+                          >
+                            {isOpen ? "閉じる" : "編集"}
+                          </button>
+                        </div>
+                      </div>
+
+                      {isOpen && (
+                        <div className={styles.editor}>
+                          <div className={styles.editGrid}>
+                            <label className={styles.field}>
+                              <span className={styles.label}>表示名</span>
+                              <input
+                                type="text"
+                                className={styles.input}
+                                value={edit.name}
+                                onChange={e =>
+                                  patchEdit(g, { name: e.target.value })
+                                }
+                                maxLength={64}
+                              />
+                            </label>
+                            <label className={styles.field}>
+                              <span className={styles.label}>コイン</span>
+                              <input
+                                type="number"
+                                className={`${styles.input} ${styles.num}`}
+                                value={edit.amount}
+                                min={0}
+                                max={100000}
+                                onChange={e => {
+                                  const n = Number(e.target.value);
+                                  patchEdit(g, {
+                                    amount: Number.isFinite(n) ? n : 0,
+                                  });
+                                }}
+                              />
+                            </label>
+                            <label className={styles.field}>
+                              <span className={styles.label}>ギフト名</span>
+                              <input
+                                type="text"
+                                className={styles.input}
+                                value={edit.giftName}
+                                onChange={e =>
+                                  patchEdit(g, { giftName: e.target.value })
+                                }
+                                maxLength={64}
+                              />
+                            </label>
+                            <label className={styles.field}>
+                              <span className={styles.label}>回数</span>
+                              <input
+                                type="number"
+                                className={`${styles.input} ${styles.num}`}
+                                value={edit.count}
+                                min={1}
+                                max={50}
+                                onChange={e => {
+                                  const n = Number(e.target.value);
+                                  patchEdit(g, {
+                                    count: Number.isFinite(n) ? n : 1,
+                                    countDirty: true,
+                                  });
+                                }}
+                              />
+                            </label>
+                            <label className={styles.field}>
+                              <span className={styles.label}>モード</span>
+                              <select
+                                className={`${styles.input} ${styles.select}`}
+                                value={edit.modeId}
+                                onChange={e =>
+                                  patchEdit(g, {
+                                    modeId: e.target.value,
+                                    modeDirty: true,
+                                  })
+                                }
+                              >
+                                {MODELS.map((m: Mode) => (
+                                  <option key={m.id} value={m.id}>
+                                    {m.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          </div>
+                          <div className={styles.editFoot}>
+                            <label className={styles.checkRow}>
+                              <input
+                                type="checkbox"
+                                checked={edit.treatAsNewIdentity}
+                                onChange={e =>
+                                  patchEdit(g, {
+                                    treatAsNewIdentity: e.target.checked,
+                                  })
+                                }
+                              />
+                              <span>別人として記録 (新規ID)</span>
+                            </label>
+                            <button
+                              type="button"
+                              className={`${styles.btn} ${styles.btnGhost}`}
+                              onClick={() => resetEdit(g)}
+                            >
+                              推奨値に戻す
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

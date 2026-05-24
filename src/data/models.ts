@@ -11,8 +11,8 @@ export const MODELS: ReadonlyArray<Mode> = [
   {
     id: "default",
     name: "Default",
-    description: "全候補をフラットに抽選",
-    weights: { S: 1, A: 1, B: 1, C: 1 },
+    description: "C(安定)中心、まれに上位がのぞく",
+    weights: { S: 1, A: 2, B: 4, C: 8 },
     prefectures: [],
     enabled: true,
     order: 0,
@@ -20,20 +20,11 @@ export const MODELS: ReadonlyArray<Mode> = [
   {
     id: "premium",
     name: "プレミアム",
-    description: "S/A を厚く、ハズレ枠は少しだけ",
+    description: "S(超おすすめ)を厚く、安定枠は少しだけ",
     weights: { S: 8, A: 4, B: 2, C: 1 },
     prefectures: [],
     enabled: true,
     order: 1,
-  },
-  {
-    id: "hard",
-    name: "ハードモード",
-    description: "C 枠中心、まれに上位がのぞく",
-    weights: { S: 1, A: 2, B: 4, C: 8 },
-    prefectures: [],
-    enabled: true,
-    order: 2,
   },
 ];
 

@@ -193,7 +193,21 @@ export default function MapOverlay({
         const onRight = p.x < JapanData.WIDTH * 0.55;
         const sx = onRight ? 1 : -1;
         const panelW = 520;
-        const panelH = 200;
+        // 地名を 10 文字ごとに折り返し、パネル高さを動的に伸ばす。
+        // 46px 全角に letterSpacing 2 で usable width 約 496px → ~10 文字に収まる。
+        const NAME_MAX_PER_LINE = 10;
+        const nameRaw = locked.name || "";
+        const nameLines: string[] = [];
+        if (nameRaw.length === 0) {
+          nameLines.push("");
+        } else {
+          for (let i = 0; i < nameRaw.length; i += NAME_MAX_PER_LINE) {
+            nameLines.push(nameRaw.slice(i, i + NAME_MAX_PER_LINE));
+          }
+        }
+        const nameLineH = 52;
+        const extraH = (nameLines.length - 1) * nameLineH;
+        const panelH = 200 + extraH;
         const elbow = { x: p.x + sx * 200, y: p.y - 180 };
         const panelX = onRight ? elbow.x : elbow.x - panelW;
         const panelTop = elbow.y - panelH;
@@ -420,11 +434,15 @@ export default function MapOverlay({
               letterSpacing="2"
               fill="#3a2a25"
             >
-              {locked.name}
+              {nameLines.map((line, i) => (
+                <tspan key={i} x={textX} dy={i === 0 ? 0 : nameLineH}>
+                  {line}
+                </tspan>
+              ))}
             </text>
             <text
               x={textX}
-              y={panelTop + 172}
+              y={panelTop + 172 + extraH}
               fontFamily="JetBrains Mono, monospace"
               fontSize="13"
               letterSpacing="2"

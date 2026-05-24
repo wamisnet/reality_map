@@ -8,6 +8,11 @@ import { SFX } from "@/lib/audio";
 import { fmtCoord } from "@/lib/japan-data";
 import { markGiftProcessed } from "@/lib/gifts-store";
 import { saveResult } from "@/lib/results";
+import {
+  pushUtterance,
+  utterResultLine,
+  utterStartLine,
+} from "@/lib/utterances";
 import { useCandidates } from "@/hooks/useCandidates";
 import { useActiveMode } from "@/hooks/useActiveMode";
 import { useCrosshairScan } from "@/hooks/useCrosshairScan";
@@ -78,6 +83,15 @@ export default function CrosshairScanApp() {
     treatAsNewIdentity: boolean;
   } | null>(null);
 
+  // 一括抽選用: 次に流すべきセッション (= ギフト) を順次積むキュー。
+  // 各セッションは「個別 fire と同じ挙動」を取り、間に continuousLockSec の wait を挟む。
+  const sessionQueueRef = useRef<FireFromGiftArgs[]>([]);
+  const [queueLen, setQueueLen] = useState(0);
+  function setQueue(next: FireFromGiftArgs[]) {
+    sessionQueueRef.current = next;
+    setQueueLen(next.length);
+  }
+
   const participantRef = useRef(participantName);
   useEffect(() => {
     participantRef.current = participantName;
@@ -99,6 +113,7 @@ export default function CrosshairScanApp() {
     (winner: Winner) => {
       const name = participantRef.current.trim();
       if (!name || !user) return;
+      pushUtterance(user.uid, utterResultLine(winner.name, winner.desc));
       setDrawLog(prev => [{ winner, participantName: name }, ...prev].slice(0, 5));
       const { id: modeId, name: modeName } = modeSnapshotRef.current;
       const giftSnap = activeGiftRef.current;
@@ -168,46 +183,64 @@ export default function CrosshairScanApp() {
     if (!canFire) return;
     setSaveError(null);
     activeGiftRef.current = null; // 手入力経路: gift メタを必ずクリア
+    setQueue([]); // 手動 fire はキューを破棄
     const n = Math.max(1, Math.min(50, Math.floor(drawCount)));
     setRemaining(n - 1);
+    if (user) pushUtterance(user.uid, utterStartLine(participantRef.current));
     fire();
-  }, [canFire, drawCount, fire]);
+  }, [canFire, drawCount, fire, user]);
 
   const handleFireAgain = useCallback(() => {
     if (!canFire) return;
     setSaveError(null);
     activeGiftRef.current = null;
+    setQueue([]);
+    if (user) pushUtterance(user.uid, utterStartLine(participantRef.current));
     fireAgain();
-  }, [canFire, fireAgain]);
+  }, [canFire, fireAgain, user]);
 
   const handleCancelQueue = useCallback(() => {
     setRemaining(0);
     activeGiftRef.current = null;
+    setQueue([]); // 一括抽選の残りセッションも破棄
   }, []);
 
-  const handleFireFromGift = useCallback(
-    (args: FireFromGiftArgs) => {
-      if (phase === "scanning" || remaining > 0) return;
-      setSaveError(null);
+  /**
+   * 1ギフト = 1セッション分の state を立てて fire() する内部ヘルパー。
+   * handleFireFromGift / 一括抽選の次セッション進行 から共有される。
+   */
+  const startSession = useCallback(
+    (s: FireFromGiftArgs) => {
       activeGiftRef.current = {
-        giftId: args.giftId,
-        giftUserRaw: args.giftUserRaw,
-        giftAmount: args.giftAmount,
-        giftName: args.giftName,
-        giftSource: args.giftSource,
-        treatAsNewIdentity: args.treatAsNewIdentity,
+        giftId: s.giftId,
+        giftUserRaw: s.giftUserRaw,
+        giftAmount: s.giftAmount,
+        giftName: s.giftName,
+        giftSource: s.giftSource,
+        treatAsNewIdentity: s.treatAsNewIdentity,
       };
-      setParticipantName(args.displayName);
-      participantRef.current = args.displayName;
-      setActiveModeId(args.modeId);
-      setDrawCount(args.count);
-      // ParticipantPanel と同じく即時 snapshot を作るため、handleFire 経由ではなく
-      // インラインで fire() を呼ぶ (state バッチ更新を待たない)。
-      const n = Math.max(1, Math.min(50, Math.floor(args.count)));
+      setParticipantName(s.displayName);
+      participantRef.current = s.displayName;
+      setActiveModeId(s.modeId);
+      setDrawCount(s.count);
+      const n = Math.max(1, Math.min(50, Math.floor(s.count)));
       setRemaining(n - 1);
+      if (user) pushUtterance(user.uid, utterStartLine(s.displayName));
       fire();
     },
-    [phase, remaining, fire, setActiveModeId],
+    [fire, setActiveModeId, user],
+  );
+
+  const handleFireFromGift = useCallback(
+    (sessions: FireFromGiftArgs[]) => {
+      if (phase === "scanning" || remaining > 0) return;
+      if (sessions.length === 0) return;
+      setSaveError(null);
+      // 先頭セッションを即実行、残りはキューに積む (continuousLockSec 間隔で順次進む)
+      setQueue(sessions.slice(1));
+      startSession(sessions[0]);
+    },
+    [phase, remaining, startSession],
   );
 
   // Continuous draws: after each locked result, auto reset → fire until queue drained.
@@ -222,12 +255,30 @@ export default function CrosshairScanApp() {
     return () => window.clearTimeout(t);
   }, [phase, remaining, reset, fire, tweak.continuousLockSec]);
 
-  // 連続抽選が全部完了したら gift snapshot を解除して手入力モードに戻す。
+  // 一括抽選の次セッション進行:
+  // 現セッションの連続抽選が全部済んだ (locked & remaining=0) かつキューが残っているなら、
+  // continuousLockSec 待って次のセッション (= 次のギフト) を独立 fire し直す。
+  // queueLen 経由で deps を効かせている (ref だけだと effect が trigger しない)。
   useEffect(() => {
-    if (phase === "idle" && remaining === 0) {
+    if (phase !== "locked" || remaining !== 0) return;
+    if (queueLen === 0) return;
+    const lockMs = Math.max(0, tweak.continuousLockSec * 1000);
+    const t = window.setTimeout(() => {
+      const next = sessionQueueRef.current[0];
+      if (!next) return;
+      setQueue(sessionQueueRef.current.slice(1));
+      reset();
+      window.setTimeout(() => startSession(next), 800);
+    }, lockMs);
+    return () => window.clearTimeout(t);
+  }, [phase, remaining, queueLen, reset, startSession, tweak.continuousLockSec]);
+
+  // 全セッション (連続抽選もキューも) 完了したら gift snapshot を解除して手入力モードに戻す。
+  useEffect(() => {
+    if (phase === "idle" && remaining === 0 && queueLen === 0) {
       activeGiftRef.current = null;
     }
-  }, [phase, remaining]);
+  }, [phase, remaining, queueLen]);
 
   const active = phase === "locked" ? locked : candidates[scanIdx];
   const display = active ?? candidates[0] ?? null;
@@ -316,7 +367,7 @@ export default function CrosshairScanApp() {
 
       <CandidatesPool candidates={candidates} />
 
-      {phase === "idle" && remaining === 0 && (
+      {phase === "idle" && remaining === 0 && queueLen === 0 && (
         <GiftQueuePanel
           gifts={gifts}
           busy={false}
