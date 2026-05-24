@@ -11,10 +11,24 @@ interface PageProps {
   params: Promise<{ participantId: string }>;
 }
 
+// このページは Vercel 上で SSR されるため、Vercel のデフォルト TZ (UTC) を避け、
+// 明示的に Asia/Tokyo で整形する。視聴者は日本にいる前提なので JST 固定で問題ない。
+const JST_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: "Asia/Tokyo",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23", // 深夜を "00" にする (ja-JP デフォルトは "h24" の処理系がある)
+});
+
 function formatDate(d: Date | null, fallback: string): string {
   if (!d) return fallback;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const parts = JST_FORMATTER.formatToParts(d);
+  const get = (t: Intl.DateTimeFormatPartTypes) =>
+    parts.find(p => p.type === t)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
 }
 
 export async function generateMetadata(

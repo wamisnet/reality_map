@@ -94,6 +94,11 @@ export function useCrosshairScan({
     controllerRef.current = controller;
   }, [controller]);
 
+  // 直近の当選候補 ID を ref で持つ (fire() の deps を増やさず最新を読むため)。
+  // UI 表示用の `winners` state (マップに過去当選を出す目的で5件キャップ) とは別系統で、
+  // pickWeightedIndex に渡す avoid セットの源泉。
+  const recentWinnerIdsRef = useRef<string[]>([]);
+
   // ─── Per-frame: smooth reticle toward target, tick telemetry, idle drift.
   useAnimationFrame(
     useCallback(
@@ -162,7 +167,14 @@ export function useCrosshairScan({
       setPhaseBoth("scanning");
       lastTickIdxRef.current = -1;
 
-      const finalIdx = pickWeightedIndex(candidates, modeSnapshot);
+      // 直近 avoidRecentRepeat 件の当選候補 ID を除外して被り回避。
+      // 候補が枯れたら weighted-pick 側で勝手にフォールバックする。
+      const avoidN = Math.max(0, tweak.avoidRecentRepeat ?? 0);
+      const avoidIds: Set<string> | null =
+        avoidN > 0 && recentWinnerIdsRef.current.length > 0
+          ? new Set(recentWinnerIdsRef.current.slice(0, avoidN))
+          : null;
+      const finalIdx = pickWeightedIndex(candidates, modeSnapshot, avoidIds);
       if (finalIdx < 0) {
         // pickWeightedIndex がフィルタで何も選べなかった場合：idle に戻して空振り
         setPhaseBoth("idle");
@@ -232,6 +244,13 @@ export function useCrosshairScan({
           );
           setLocked(winner);
           setWinners(ws => [winner, ...ws].slice(0, 5));
+          // avoid 履歴は UI と分離して長めにキャップ (avoidRecentRepeat の倍ぐらい)
+          if (w.id) {
+            recentWinnerIdsRef.current = [
+              w.id,
+              ...recentWinnerIdsRef.current,
+            ].slice(0, Math.max(0, tweak.avoidRecentRepeat ?? 0) * 2 + 5);
+          }
           setPhaseBoth("locked");
           onLockedRef.current?.(winner);
           SFX.lockOnByRank(winner.rank);

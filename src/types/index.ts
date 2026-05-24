@@ -101,6 +101,8 @@ export interface Tweak {
   detailDelaySec: number;
   lockZoom: number;
   continuousLockSec: number;
+  /** 直近 N 件の抽選結果と被らないように除外する。0 で機能オフ。 */
+  avoidRecentRepeat: number;
 }
 
 export interface MapController {
