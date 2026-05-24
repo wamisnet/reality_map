@@ -9,46 +9,11 @@ const OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter";
 export interface LandmarkHit {
   id: string;
   name: string;
-  /** 日本語ラベル化したカテゴリ (例: 美術館, 動物園, 城)。判別不能なら null。 */
-  category: string | null;
   lat: number;
   lon: number;
   /** ピンからの距離 (m) */
   distance: number;
 }
-
-/**
- * OSM タグ → 日本語カテゴリへの簡易マッピング。
- * よく使いそうな観光/文化系を優先。未マップは null（カテゴリ入力欄は手動で）。
- */
-const TAG_TO_CATEGORY: ReadonlyArray<[string, string, string]> = [
-  // [tagKey, tagValue, 日本語ラベル]
-  ["tourism", "museum", "美術館"],
-  ["tourism", "gallery", "ギャラリー"],
-  ["tourism", "zoo", "動物園"],
-  ["tourism", "aquarium", "水族館"],
-  ["tourism", "theme_park", "テーマパーク"],
-  ["tourism", "attraction", "観光名所"],
-  ["tourism", "viewpoint", "展望スポット"],
-  ["tourism", "artwork", "アート"],
-  ["historic", "castle", "城"],
-  ["historic", "monument", "記念碑"],
-  ["historic", "memorial", "記念碑"],
-  ["historic", "ruins", "遺跡"],
-  ["historic", "archaeological_site", "遺跡"],
-  ["amenity", "place_of_worship", "寺社"],
-  ["amenity", "library", "図書館"],
-  ["amenity", "theatre", "劇場"],
-  ["amenity", "cinema", "映画館"],
-  ["amenity", "marketplace", "市場"],
-  ["leisure", "park", "公園"],
-  ["leisure", "garden", "庭園"],
-  ["natural", "peak", "山"],
-  ["natural", "volcano", "火山"],
-  ["natural", "waterfall", "滝"],
-  ["natural", "hot_spring", "温泉"],
-  ["railway", "station", "駅"],
-];
 
 interface OverpassElement {
   type: string;
@@ -61,13 +26,6 @@ interface OverpassElement {
 
 interface OverpassResponse {
   elements?: OverpassElement[];
-}
-
-function deriveCategory(tags: Record<string, string>): string | null {
-  for (const [k, v, label] of TAG_TO_CATEGORY) {
-    if (tags[k] === v) return label;
-  }
-  return null;
 }
 
 function pickName(tags: Record<string, string>): string | null {
@@ -140,7 +98,6 @@ out center 30;
     hits.push({
       id: `${el.type}/${el.id}`,
       name,
-      category: deriveCategory(tags),
       lat: elLat,
       lon: elLon,
       distance: distanceMeters(lat, lon, elLat, elLon),

@@ -175,11 +175,35 @@ export async function loadRealMapTile(
 }
 
 // ─── 候補画像 → data URL ───────────────────────────────────────
+const MIME_BY_EXT: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+};
+
 export async function loadRemoteImageDataUrl(
   url: string | null | undefined,
 ): Promise<string | null> {
   if (!url) return null;
   if (url.startsWith("data:")) return url;
+  // 相対パス (例: /candidates/foo.jpg) は origin に依存するので Node の fetch では解決できない。
+  // public/ 配下にあるはずなので、fs から直接読む。
+  if (url.startsWith("/")) {
+    try {
+      const { readFile } = await import("node:fs/promises");
+      const path = await import("node:path");
+      const fsPath = path.join(process.cwd(), "public", url.replace(/^\//, ""));
+      const buf = await readFile(fsPath);
+      const ext = path.extname(url).toLowerCase();
+      const mime = MIME_BY_EXT[ext] ?? "application/octet-stream";
+      return `data:${mime};base64,${buf.toString("base64")}`;
+    } catch {
+      return null;
+    }
+  }
   try {
     const res = await fetch(url);
     if (!res.ok) return null;

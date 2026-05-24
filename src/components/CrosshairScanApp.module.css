@@ -34,6 +34,35 @@
   z-index: 0;
 }
 
+.emptyState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: var(--font-jp);
+  font-size: 14px;
+  color: var(--text);
+  padding: 24px;
+  z-index: 20;
+  line-height: 1.8;
+}
+
+.emptyState a {
+  color: var(--primary, #ff9fb6);
+  font-weight: 700;
+  text-decoration: none;
+  margin: 0 4px;
+  padding: 2px 8px;
+  background: rgba(255, 159, 182, 0.12);
+  border-radius: 6px;
+}
+
+.emptyState a:hover {
+  background: rgba(255, 159, 182, 0.22);
+}
+
 .scanline {
   position: absolute;
   inset: 0;

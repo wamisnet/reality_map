@@ -22,9 +22,9 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "咲月わみの旅ガチャ · Ops Console",
+  title: "咲月わみの旅ガチャ",
   description:
-    "ライブ配信で旅行の行き先をガチャ感覚で抽選。日本全国の候補から一つを選び出します。",
+    "ライブ配信で日本全国の旅先をガチャ感覚で引き当てよう。咲月わみの Reality 枠に遊びにきて、次の旅の行き先を一緒に見つけよう♪",
 };
 
 export default function RootLayout({

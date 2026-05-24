@@ -24,9 +24,6 @@ export interface Candidate {
    *  無ければ image を 1 枚として扱う。空配列は「画像なし」と等価。 */
   images?: string[] | null;
   desc?: string | null;
-  /** 場所の種類/カテゴリ (例: "動物園", "美術館", "城")。
-   *  設定されていれば結果カード上で都道府県の代わりに表示される。 */
-  category?: string | null;
 }
 
 /**
@@ -67,6 +64,8 @@ export interface Winner extends Candidate {
   c: FormattedCoord;
   at: string;
   rank: Rank;
+  /** 元の候補ドキュメントの ID。result ページで画像・説明文を最新の候補から引き直すために保存する。 */
+  candidateId: string | null;
   // image / images は Candidate から継承。images はスナップショット時に固める。
 }
 
@@ -111,16 +110,3 @@ export interface MapController {
 }
 
 export type ProjectFn = (lon: number, lat: number) => { x: number; y: number };
-
-/**
- * Tuple input format for CANDIDATES (legacy compatibility, in-code data source).
- * [name, pref, lon, lat, image?, desc?]
- */
-export type CandidateTuple = [
-  string,
-  string,
-  number,
-  number,
-  string?,
-  string?,
-];

@@ -170,16 +170,30 @@ export function useCrosshairScan({
       }
 
       const TICKS = 26;
+      // 序盤 WANDER_TICKS 回: 全候補からランダムに飛び回って「ぐるぐる」感を出す
+      // 残り (TICKS - WANDER_TICKS) 回: finalIdx を中心に span を縮めながら収束
+      const WANDER_TICKS = 16;
       let i = 0;
       const step = () => {
         const t = i / TICKS;
-        const span = Math.max(1, Math.floor((1 - t) * candidates.length * 0.4));
-        const next =
-          i === TICKS
-            ? finalIdx
-            : ((finalIdx + Math.floor((Math.random() * 2 - 1) * span)) +
-                candidates.length) %
-              candidates.length;
+        let next: number;
+        if (i === TICKS) {
+          next = finalIdx;
+        } else if (i < WANDER_TICKS) {
+          // 全域から一様ランダム。直前と同じインデックスを引いた場合は隣にずらして必ず動かす
+          let rnd = Math.floor(Math.random() * candidates.length);
+          if (candidates.length > 1 && rnd === lastTickIdxRef.current) {
+            rnd = (rnd + 1) % candidates.length;
+          }
+          next = rnd;
+        } else {
+          const u = (i - WANDER_TICKS) / (TICKS - WANDER_TICKS);
+          const span = Math.max(1, Math.floor((1 - u) * candidates.length * 0.5));
+          next =
+            ((finalIdx + Math.floor((Math.random() * 2 - 1) * span)) +
+              candidates.length) %
+            candidates.length;
+        }
         setScanIdx(next);
         const cand = candidates[next];
         targetLLRef.current = { lon: cand.lon, lat: cand.lat };
@@ -208,10 +222,10 @@ export function useCrosshairScan({
             image: snapshotImages?.[0] ?? null,
             images: snapshotImages,
             desc: w.desc ?? null,
-            category: w.category ?? null,
             rank: w.rank,
             c,
             at: nowStamp(),
+            candidateId: w.id,
           };
           console.log(
             `[avatar-debug] ${performance.now().toFixed(1)}ms LOCKED rank=${winner.rank} name=${winner.name}`,

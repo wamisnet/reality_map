@@ -12,9 +12,10 @@ import {
   OKINAWA_INSET,
 } from "@/lib/og-map";
 import { fetchResultById, isValidParticipantId } from "@/lib/results";
+import { fetchCandidateById } from "@/lib/candidates-store";
 import { voiceLineFor } from "@/data/voice-lines";
 import { loadNotoJp } from "@/lib/og-fonts";
-import type { Rank } from "@/types";
+import { getCandidateImages, type Rank } from "@/types";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -128,14 +129,22 @@ export default async function Image({ params }: RouteParams) {
     const r = await fetchResultById(resultId).catch(() => null);
     if (r && r.participantId === participantId) {
       participantName = r.participantName;
-      pref = r.category ?? r.pref;
+      pref = r.pref;
       city = r.candidateName;
       rank = r.rank;
       lat = r.lat;
       lon = r.lon;
       coordStr = `${r.lat.toFixed(4)}, ${r.lon.toFixed(4)}`;
-      imageUrl = r.image ?? null;
-      desc = r.desc ?? null;
+      // 画像と説明文は最新の候補ドキュメントから引き直す (result page と同じロジック)。
+      // 候補が削除済み・古い結果で candidateId 未保存のときはスナップショットを使う。
+      const liveCandidate = r.candidateId
+        ? await fetchCandidateById(r.candidateId).catch(() => null)
+        : null;
+      const sourceImages = liveCandidate
+        ? getCandidateImages(liveCandidate)
+        : getCandidateImages(r);
+      imageUrl = sourceImages[0] ?? null;
+      desc = liveCandidate?.desc ?? r.desc ?? null;
       found = true;
     }
   }
@@ -293,42 +302,43 @@ export default async function Image({ params }: RouteParams) {
             <span>TARGET LOCKED</span>
           </div>
 
-          {/* Character (left column). Height a bit reduced from full so a voice-line
-              speech bubble fits underneath. Pose comes from poseForRank(rank). */}
+          {/* Character (left column). Centered vertically in the inner area
+              (≈y:108-488 when a voice-line is shown). When there's no voice line
+              the character keeps its larger height anchored toward the bottom. */}
           {characterUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={characterUrl}
               alt=""
               width={360}
-              height={voiceLine ? 460 : 568}
+              height={voiceLine ? 380 : 568}
               style={{
                 position: "absolute",
                 left: 16,
-                top: 58,
+                top: voiceLine ? 108 : 30,
                 objectFit: "contain",
                 objectPosition: "bottom",
               }}
             />
           )}
 
-          {/* Voice line bubble — sits directly below the character on the left side.
-              3-line clamp so long voice lines truncate cleanly with an ellipsis
-              instead of getting sliced mid-glyph. */}
+          {/* Voice line bubble — directly below the (now centered) character.
+              2-line clamp keeps total height ≤ ~72px so the bubble does not
+              cross past the bottom-bar baseline on S-rank (594px inner height). */}
           {voiceLine && (
             <div
               style={{
                 position: "absolute",
                 left: 24,
-                top: 532,
+                top: 498,
                 width: 344,
-                padding: "14px 18px",
+                padding: "12px 16px",
                 boxSizing: "border-box",
                 background: "#ffffff",
                 borderRadius: 18,
                 border: "1.5px solid rgba(255, 159, 182, 0.45)",
                 boxShadow: "0 6px 18px rgba(170,130,120,0.18)",
-                fontSize: 19,
+                fontSize: 17,
                 lineHeight: 1.4,
                 color: INK,
                 fontWeight: 600,
@@ -336,7 +346,7 @@ export default async function Image({ params }: RouteParams) {
                 textAlign: "center",
                 display: "-webkit-box",
                 WebkitBoxOrient: "vertical",
-                WebkitLineClamp: 3,
+                WebkitLineClamp: 2,
                 overflow: "hidden",
               }}
             >
@@ -370,30 +380,63 @@ export default async function Image({ params }: RouteParams) {
             </div>
             <div
               style={{
-                // 字数で段階的に縮小。≥9文字は 2 行折り返し前提でサイズを保つ。
-                // 列幅: 写真あり ≈ 360px / 写真なし ≈ 770px
+                // 実描画では和文 1 文字が fontSize より僅かに広い (kerning / advance width のずれ)。
+                // 理論幅 (写真あり 324 / 写真なし 736) に約 10% のマージンを引いた
+                // 実効幅 ≈ 写真あり 292 / 写真なし 660 を基準にフォントを決定する。
                 fontSize: photoDataUrl
-                  ? city.length >= 9
-                    ? 56 // 2 lines OK
-                    : city.length >= 7
-                      ? 48
-                      : city.length >= 5
-                        ? 60
-                        : city.length >= 4
-                          ? 72
-                          : 80
-                  : city.length >= 9
-                    ? 80 // 2 lines OK
-                    : city.length >= 7
-                      ? 96
-                      : city.length >= 5
-                        ? 104
-                        : 112,
+                  ? city.length >= 41
+                    ? 20 // 3 行 (60)
+                    : city.length >= 27
+                      ? 22 // 2-3 行 (≤66)
+                      : city.length >= 23
+                        ? 24 // 2 行 (48)
+                        : city.length >= 21
+                          ? 26 // 2 行 (52)
+                          : city.length >= 19
+                            ? 28 // 2 行 (56)
+                            : city.length >= 17
+                              ? 32 // 2 行 (64)
+                              : city.length >= 8
+                                ? 36 // 1-2 行 (chars 8 は 1 行 288; 9-16 は 2 行 ≤72)
+                                : city.length >= 7
+                                  ? 40 // 1 行 (280)
+                                  : city.length >= 6
+                                    ? 48 // 1 行 (288)
+                                    : city.length >= 5
+                                      ? 56 // 1 行 (280)
+                                      : 72 // ≤4 字 (288)
+                  : city.length >= 41
+                    ? 26 // 3 行 (78)
+                    : city.length >= 33
+                      ? 32 // 3 行 (96)
+                      : city.length >= 27
+                        ? 42 // 2 行 (84)
+                        : city.length >= 14
+                          ? 50 // 2 行 (100)
+                          : city.length >= 12
+                            ? 54 // 1 行 (648)
+                            : city.length >= 11
+                              ? 58 // 1 行 (638)
+                              : city.length >= 10
+                                ? 64 // 1 行 (640) ※ナガシマスパーランド
+                                : city.length >= 9
+                                  ? 72 // 1 行 (648)
+                                  : city.length >= 8
+                                    ? 80 // 1 行 (640)
+                                    : city.length >= 7
+                                      ? 92 // 1 行 (644)
+                                      : city.length >= 5
+                                        ? 104 // 1 行 (624)
+                                        : 112, // ≤4 字 (448)
                 fontWeight: 700,
-                // 2 行になるパターンだけ少し緩める。1 行のときは詰めて見せたい。
-                lineHeight: city.length >= 9 ? 1.1 : 1,
+                // lineHeight 1.0 で「N 行 = N × fontSize」が厳密に一致する
+                lineHeight: 1,
                 color: INK,
-                display: "flex",
+                maxHeight: photoDataUrl ? 80 : 112,
+                overflow: "hidden",
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: 3,
               }}
             >
               {found ? city : "NOT FOUND"}

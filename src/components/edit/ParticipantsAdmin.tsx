@@ -3,15 +3,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   fetchParticipantSummaries,
+  mergeParticipants,
   type ParticipantSummary,
 } from "@/lib/participants";
+import { useAuth } from "@/components/AuthProvider";
 import editStyles from "./Edit.module.css";
 import styles from "./ParticipantsAdmin.module.css";
 
 const TEMPLATE_KEY = "crosshair.participantMessageTemplate";
 
 const DEFAULT_TEMPLATE =
-  "{name} さん、咲月わみの旅ガチャの抽選結果ページができました✦\n下のリンクから旅の行き先を見ることができます。\n{url}";
+  "{name} さん、咲月わみの旅ガチャの抽選結果ページができたよ✦\nさっそく下のリンクから旅の行き先をチェックしてみてね!\n気に入ったら、X (旧 Twitter) などでシェアしてくれるとうれしいな♪\n{url}";
 
 type LoadState =
   | { kind: "loading" }
@@ -35,10 +37,15 @@ function renderMessage(template: string, name: string, url: string): string {
 }
 
 export default function ParticipantsAdmin() {
+  const { user } = useAuth();
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [origin, setOrigin] = useState("");
   const [template, setTemplate] = useState(DEFAULT_TEMPLATE);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+  const [mergeTargetId, setMergeTargetId] = useState<string>("");
+  const [mergeBusy, setMergeBusy] = useState(false);
+  const [mergeMsg, setMergeMsg] = useState<string | null>(null);
 
   // origin + saved template の読み込み (クライアントのみ)
   useEffect(() => {
@@ -60,6 +67,76 @@ export default function ParticipantsAdmin() {
       });
     }
   }, []);
+
+  const selectedRows = useMemo(() => {
+    if (state.kind !== "ok") return [];
+    return state.rows.filter(r => selected.has(r.participantId));
+  }, [state, selected]);
+
+  // 統合先のデフォルトは「最古に作られた」ID (firstAt 昇順の先頭)。
+  // ユーザーが select で別の ID を選んでいる場合 (= 選択行に含まれる) はそれを尊重。
+  const defaultMergeTargetId = useMemo(() => {
+    if (selectedRows.length === 0) return "";
+    const sorted = [...selectedRows].sort((a, b) => {
+      const fa = a.firstAt ? a.firstAt.getTime() : Number.POSITIVE_INFINITY;
+      const fb = b.firstAt ? b.firstAt.getTime() : Number.POSITIVE_INFINITY;
+      return fa - fb;
+    });
+    return sorted[0]?.participantId ?? "";
+  }, [selectedRows]);
+
+  const effectiveMergeTargetId =
+    mergeTargetId && selectedRows.some(r => r.participantId === mergeTargetId)
+      ? mergeTargetId
+      : defaultMergeTargetId;
+
+  const toggleSelect = useCallback((pid: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(pid)) next.delete(pid);
+      else next.add(pid);
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelected(new Set());
+    setMergeMsg(null);
+  }, []);
+
+  const runMerge = useCallback(async () => {
+    if (!user) {
+      setMergeMsg("サインインが必要です");
+      return;
+    }
+    const targetId = effectiveMergeTargetId;
+    if (selectedRows.length < 2 || !targetId) return;
+    const fromIds = selectedRows
+      .map(r => r.participantId)
+      .filter(id => id !== targetId);
+    const target = selectedRows.find(r => r.participantId === targetId);
+    const targetName = target?.participantName ?? targetId;
+    const ok = window.confirm(
+      `${fromIds.length} 件の参加者を「${targetName} (${targetId})」に統合します。\n` +
+        `元の participantId は履歴から消えます。元に戻すには手動で個別レコードの participantId を書き換える必要があります。\n\n` +
+        `続行しますか？`,
+    );
+    if (!ok) return;
+    setMergeBusy(true);
+    setMergeMsg(null);
+    try {
+      const { updated } = await mergeParticipants(fromIds, targetId, user.uid);
+      setMergeMsg(`${updated} 件を統合しました`);
+      clearSelection();
+      await load();
+    } catch (err) {
+      setMergeMsg(
+        `マージ失敗: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    } finally {
+      setMergeBusy(false);
+    }
+  }, [user, selectedRows, effectiveMergeTargetId, clearSelection, load]);
 
   useEffect(() => {
     void load();
@@ -149,8 +226,43 @@ export default function ParticipantsAdmin() {
         </button>
       </div>
 
+      {selectedRows.length > 0 && (
+        <div className={styles.mergeBar}>
+          <span>Merge selected ({selectedRows.length})</span>
+          <span>→</span>
+          <select
+            value={effectiveMergeTargetId}
+            onChange={e => setMergeTargetId(e.target.value)}
+            disabled={mergeBusy}
+          >
+            {selectedRows.map(r => (
+              <option key={r.participantId} value={r.participantId}>
+                {r.participantName} ({r.participantId})
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => void runMerge()}
+            disabled={mergeBusy || selectedRows.length < 2 || !effectiveMergeTargetId}
+          >
+            {mergeBusy ? "merging…" : "Merge"}
+          </button>
+          <button
+            type="button"
+            className={styles.ghost}
+            onClick={clearSelection}
+            disabled={mergeBusy}
+          >
+            Clear
+          </button>
+          {mergeMsg && <span className={styles.mergeStatus}>{mergeMsg}</span>}
+        </div>
+      )}
+
       <div className={styles.list}>
         <div className={styles.headerRow}>
+          <div></div>
           <div>NAME</div>
           <div>ID</div>
           <div>RESULTS</div>
@@ -170,8 +282,21 @@ export default function ParticipantsAdmin() {
             const message = renderMessage(template, p.participantName, url);
             const msgKey = `msg:${p.participantId}`;
             const urlKey = `url:${p.participantId}`;
+            const isSelected = selected.has(p.participantId);
             return (
-              <div key={p.participantId} className={styles.row}>
+              <div
+                key={p.participantId}
+                className={`${styles.row} ${isSelected ? styles.selected : ""}`}
+              >
+                <div className={styles.checkCell}>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleSelect(p.participantId)}
+                    disabled={mergeBusy}
+                    aria-label={`select ${p.participantName}`}
+                  />
+                </div>
                 <div className={styles.nameCell}>
                   <span className={styles.name}>{p.participantName}</span>
                 </div>

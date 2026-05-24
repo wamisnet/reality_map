@@ -69,13 +69,15 @@
 
 .heroName {
   font-family: var(--font-jp);
-  font-size: clamp(30px, 5.5vw, 52px);
+  font-size: clamp(26px, 4.2vw, 40px);
   font-weight: 700;
-  line-height: 1.05;
+  line-height: 1.15;
   margin: 0;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   color: #3a2a25;
-  word-break: break-word;
+  text-wrap: pretty;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
 }
 
 .heroCount {

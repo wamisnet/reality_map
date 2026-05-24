@@ -10,7 +10,6 @@ import styles from "./PinDraftPanel.module.css";
 
 export interface DraftForm {
   name: string;
-  category: string;
   pref: string;
   rank: Rank;
   /** 登録する画像 URL 群。空配列 = 画像なし。1 番目が cover として扱われる。 */
@@ -121,7 +120,6 @@ export default function PinDraftPanel({
   const applyLandmark = useCallback(
     (hit: LandmarkHit) => {
       const next: DraftForm = { ...formRef.current, name: hit.name };
-      if (hit.category && !next.category) next.category = hit.category;
       onChangeRef.current(next);
     },
     [],
@@ -265,11 +263,11 @@ export default function PinDraftPanel({
                     className={styles.landmarkBtn}
                     onClick={() => applyLandmark(h)}
                     disabled={busy}
-                    title="クリックで名前(と未設定ならカテゴリ)を適用"
+                    title="クリックで名前を適用"
                   >
                     <span className={styles.landmarkName}>{h.name}</span>
                     <span className={styles.landmarkMeta}>
-                      {h.category ?? "—"} · {Math.round(h.distance)}m
+                      {Math.round(h.distance)}m
                     </span>
                   </button>
                 </li>
@@ -288,21 +286,6 @@ export default function PinDraftPanel({
             disabled={busy}
             maxLength={64}
           />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label}>Category</label>
-          <input
-            className={styles.input}
-            value={form.category}
-            onChange={e => onChange({ ...form, category: e.target.value })}
-            placeholder="例: 動物園 / 美術館 / 城"
-            disabled={busy}
-            maxLength={32}
-          />
-          <div className={styles.hint}>
-            設定すると結果カードで都道府県の代わりにここが表示されます
-          </div>
         </div>
 
         <div className={styles.field}>

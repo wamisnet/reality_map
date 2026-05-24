@@ -101,6 +101,16 @@
   gap: 22px;
 }
 
+.heroIntro {
+  font-family: var(--font-jp);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.7;
+  margin: 0;
+  color: #4a3530;
+  letter-spacing: 0.02em;
+}
+
 .form {
   display: flex;
   flex-direction: column;

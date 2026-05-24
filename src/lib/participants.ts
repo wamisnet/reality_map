@@ -1,8 +1,13 @@
 import {
   collection,
+  doc,
   getDocs,
+  limit as fsLimit,
   orderBy,
   query,
+  serverTimestamp,
+  where,
+  writeBatch,
   type Timestamp,
 } from "firebase/firestore";
 import { getDb } from "./firebase";
@@ -69,4 +74,84 @@ export async function fetchParticipantSummaries(): Promise<ParticipantSummary[]>
     const lb = b.lastAt ? b.lastAt.getTime() : 0;
     return lb - la;
   });
+}
+
+const BATCH_LIMIT = 500;
+
+/**
+ * 複数の participantId を1つに統合する。
+ *
+ * 動作:
+ *   1. 各 fromId について results を全件取得 (where participantId == fromId)
+ *   2. 各 doc の `participantId` / `participantKey` を toId 側に書き換え、
+ *      `mergedFrom` / `mergedAt` / `mergedBy` メタを付与
+ *   3. Firestore の writeBatch は500件上限なので分割コミット
+ *
+ * toId 側の participantKey を統合先と揃えるため、まず toId の最新 result を
+ * 1件読んで参照 key を取得する。statesless: 失敗しても再実行で完了状態に
+ * 寄せられる (= idempotent)。
+ *
+ * Firestore rules で `results` の update は participantId/participantKey/merged*
+ * の限定5フィールド + 同一 operatorUid のみ許可する想定。
+ */
+export async function mergeParticipants(
+  fromIds: string[],
+  toId: string,
+  operatorUid: string,
+): Promise<{ updated: number }> {
+  if (!toId) throw new Error("merge: toId is empty");
+  const targets = Array.from(new Set(fromIds.filter(id => id && id !== toId)));
+  if (targets.length === 0) return { updated: 0 };
+
+  const db = getDb();
+
+  // 統合先の participantKey を取得 (最新 1 件で十分)
+  const toQ = query(
+    collection(db, "results"),
+    where("participantId", "==", toId),
+    fsLimit(1),
+  );
+  const toSnap = await getDocs(toQ);
+  if (toSnap.empty) {
+    throw new Error(`merge: 統合先 (${toId}) の results が見つかりません`);
+  }
+  const toKey = String(
+    (toSnap.docs[0].data() as Record<string, unknown>).participantKey ?? "",
+  );
+  if (!toKey) {
+    throw new Error(`merge: 統合先 (${toId}) の participantKey が空です`);
+  }
+
+  let updated = 0;
+  for (const fromId of targets) {
+    const fromQ = query(
+      collection(db, "results"),
+      where("participantId", "==", fromId),
+    );
+    const fromSnap = await getDocs(fromQ);
+    if (fromSnap.empty) continue;
+
+    let batch = writeBatch(db);
+    let count = 0;
+    for (const d of fromSnap.docs) {
+      batch.update(doc(db, "results", d.id), {
+        participantId: toId,
+        participantKey: toKey,
+        mergedFrom: fromId,
+        mergedAt: serverTimestamp(),
+        mergedBy: operatorUid,
+      });
+      count += 1;
+      if (count >= BATCH_LIMIT) {
+        await batch.commit();
+        batch = writeBatch(db);
+        count = 0;
+      }
+    }
+    if (count > 0) {
+      await batch.commit();
+    }
+    updated += fromSnap.size;
+  }
+  return { updated };
 }

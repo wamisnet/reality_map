@@ -131,12 +131,15 @@
 
 .city {
   font-family: var(--font-jp);
-  font-size: clamp(40px, 6.5vw, 60px);
+  font-size: clamp(28px, 4.6vw, 44px);
   font-weight: 700;
-  line-height: 1.05;
+  line-height: 1.15;
   margin: 0;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   color: #3a2a25;
+  text-wrap: pretty;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
 }
 
 .coord {

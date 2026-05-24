@@ -97,7 +97,7 @@ export default async function ParticipantPage({ params }: PageProps) {
                     #{String(results.length - i).padStart(3, "0")}
                   </span>
                   <span className={styles.cityCol}>
-                    <span className={styles.pref}>{r.category ?? r.pref}</span>
+                    <span className={styles.pref}>{r.pref}</span>
                     <span className={styles.city}>{r.candidateName}</span>
                   </span>
                   {r.rank && (

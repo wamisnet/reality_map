@@ -21,13 +21,24 @@ service cloud.firestore {
         && request.resource.data.lon is number
         && request.resource.data.lat is number;
 
-      // Results are immutable once written.
-      allow update, delete: if false;
+      // /edit/participants の手動マージで participantId/participantKey を統合先に
+      // 書き換えるためだけの限定的な update を許可する。書き換え可能なのは
+      // 下記5フィールドのみで、新しい participantId はランダムID形式必須、
+      // 元レコードの operatorUid を改ざんできないように一致を要求する。
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['participantId', 'participantKey', 'mergedFrom', 'mergedAt', 'mergedBy'])
+        && request.resource.data.participantId is string
+        && request.resource.data.participantId.matches('^[a-z0-9]{6,16}$')
+        && request.resource.data.participantKey is string
+        && request.resource.data.operatorUid == resource.data.operatorUid;
+
+      allow delete: if false;
     }
 
-    // 候補（地点プール）— サインインオペレーターのみ読書き
+    // 候補（地点プール）— 読みは公開 (結果ページが最新画像/説明文を引き直すため)、書きはサインインオペレーターのみ
     match /candidates/{docId} {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow write: if request.auth != null;
     }
 
@@ -36,6 +47,16 @@ service cloud.firestore {
       allow read: if request.auth != null;
       // 書き込みはサーバー側で行う想定（クライアントからは不許可）
       allow write: if false;
+    }
+
+    // 抽選アプリ専用: ギフトに「抽選済み」フラグを書き戻す限定的な update を許可。
+    // 配信者本人 (auth.uid == streamerId) が、追加する2フィールドだけを merge update できる。
+    // 既存フィールド (user_raw / amount / gift_name 等) は触らせない。
+    match /streamers/{streamerId}/gifts/{giftId} {
+      allow update: if request.auth != null
+        && request.auth.uid == streamerId
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['lottery_processed_at', 'lottery_processed_by']);
     }
   }
 }

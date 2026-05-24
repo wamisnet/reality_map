@@ -28,7 +28,6 @@ const EditMap = dynamic(() => import("@/components/edit/EditMap"), {
 
 const EMPTY_FORM: DraftForm = {
   name: "",
-  category: "",
   pref: "",
   rank: "C",
   images: [],
@@ -83,7 +82,6 @@ export default function EditMapPage() {
       setPin({ lat: c.lat, lon: c.lon });
       setForm({
         name: c.name,
-        category: c.category ?? "",
         pref: c.pref,
         rank: c.rank,
         images: getCandidateImages(c),
@@ -110,7 +108,6 @@ export default function EditMapPage() {
           lat: pin.lat,
           images: form.images,
           desc: form.desc.trim() || null,
-          category: form.category.trim() || null,
           rank: form.rank,
           // order is preserved (we don't change it on edit)
           ...(editingOrder !== null ? { order: editingOrder } : {}),
@@ -129,7 +126,6 @@ export default function EditMapPage() {
             lat: pin.lat,
             images: form.images,
             desc: form.desc.trim() || null,
-            category: form.category.trim() || null,
             rank: form.rank,
             order,
           },

@@ -3,6 +3,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   onSnapshot,
   orderBy,
   query,
@@ -24,7 +25,6 @@ interface RawCandidate {
   image?: unknown;
   images?: unknown;
   desc?: unknown;
-  category?: unknown;
   rank?: unknown;
   order?: unknown;
   createdAt?: Timestamp | null;
@@ -61,7 +61,6 @@ function toEditable(id: string, data: RawCandidate): EditableCandidate {
     image: images?.[0] ?? null,
     images,
     desc: typeof data.desc === "string" ? data.desc : null,
-    category: typeof data.category === "string" ? data.category : null,
     rank: toRank(data.rank),
     order: typeof data.order === "number" ? data.order : 0,
   };
@@ -71,6 +70,22 @@ function toEditable(id: string, data: RawCandidate): EditableCandidate {
  * Firestore の `candidates` コレクションをリアルタイム監視。
  * 並び順は order asc → name asc (name は安定化のため Firestore 側で実装、ここではクライアントソート)。
  */
+/**
+ * 単一の候補ドキュメントを ID で取得する。
+ * 結果ページが「最新の画像/説明文」を引き直すために使う。
+ * 候補が削除済みなら null を返す。
+ */
+export async function fetchCandidateById(
+  id: string,
+): Promise<EditableCandidate | null> {
+  if (!id) return null;
+  const db = getDb();
+  const ref = doc(db, COLLECTION, id);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  return toEditable(snap.id, snap.data() as RawCandidate);
+}
+
 export function subscribeCandidates(
   onChange: (list: EditableCandidate[]) => void,
   onError?: (err: Error) => void,
@@ -97,7 +112,6 @@ export interface CandidateInput {
   /** 全画像。空配列なら画像なし。 */
   images: string[];
   desc: string | null;
-  category: string | null;
   rank: Rank;
   order: number;
 }

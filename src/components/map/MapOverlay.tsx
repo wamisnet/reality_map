@@ -409,7 +409,7 @@ export default function MapOverlay({
               letterSpacing="3"
               fill="rgba(58, 42, 37, 0.55)"
             >
-              {locked.category || locked.pref}
+              {locked.pref}
             </text>
             <text
               x={textX}

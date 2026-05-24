@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { isValidParticipantId } from "@/lib/results";
 import Character from "@/components/public/Character";
-import SpeechBubble from "@/components/public/SpeechBubble";
 import PublicPageHeader from "@/components/public/PublicPageHeader";
 import RankLegend from "@/components/RankLegend";
 import styles from "./page.module.css";
@@ -48,10 +47,10 @@ export default function Home() {
           </div>
 
           <div className={styles.heroPanel}>
-            <SpeechBubble pointer="left" tone="pink">
-              こんにちは! <br />
+            <p className={styles.heroIntro}>
+              こんにちは!<br />
               あなたのIDを入れて、抽選結果を見にいきましょ♪
-            </SpeechBubble>
+            </p>
 
             <form className={styles.form} onSubmit={onSubmit}>
               <label className={styles.fieldLabel} htmlFor="participantId">

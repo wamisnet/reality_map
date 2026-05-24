@@ -6,14 +6,17 @@ import { CONFIG, THEMES } from "@/data/config";
 import { MODELS } from "@/data/models";
 import { SFX } from "@/lib/audio";
 import { fmtCoord } from "@/lib/japan-data";
+import { markGiftProcessed } from "@/lib/gifts-store";
 import { saveResult } from "@/lib/results";
 import { useCandidates } from "@/hooks/useCandidates";
 import { useActiveMode } from "@/hooks/useActiveMode";
 import { useCrosshairScan } from "@/hooks/useCrosshairScan";
+import { useGifts } from "@/hooks/useGifts";
 import type { MapController, ProjectFn, Winner } from "@/types";
 import { useAuth } from "./AuthProvider";
 import CandidatesPool from "./CandidatesPool";
 import Frame from "./Frame";
+import GiftQueuePanel, { type FireFromGiftArgs } from "./GiftQueuePanel";
 import HudHeader from "./hud/HudHeader";
 import MapOverlay from "./map/MapOverlay";
 import OperatorAvatar from "./OperatorAvatar";
@@ -60,6 +63,21 @@ export default function CrosshairScanApp() {
   const [saveError, setSaveError] = useState<SaveErrorInfo | null>(null);
   const [drawLog, setDrawLog] = useState<DrawLogEntry[]>([]);
 
+  const { gifts, loading: giftsLoading, error: giftsError } = useGifts(
+    user?.uid ?? null,
+  );
+
+  // 「次の抽選 (連続中も含む) はこのギフト由来」を示すスナップショット。
+  // 編集後の値を保持し、handleLocked から saveResult に流す。
+  const activeGiftRef = useRef<{
+    giftId: string;
+    giftUserRaw: string | null;
+    giftAmount: number;
+    giftName: string;
+    giftSource: string | null;
+    treatAsNewIdentity: boolean;
+  } | null>(null);
+
   const participantRef = useRef(participantName);
   useEffect(() => {
     participantRef.current = participantName;
@@ -83,6 +101,16 @@ export default function CrosshairScanApp() {
       if (!name || !user) return;
       setDrawLog(prev => [{ winner, participantName: name }, ...prev].slice(0, 5));
       const { id: modeId, name: modeName } = modeSnapshotRef.current;
+      const giftSnap = activeGiftRef.current;
+      const giftArg = giftSnap
+        ? {
+            giftId: giftSnap.giftId,
+            userRaw: giftSnap.treatAsNewIdentity ? null : giftSnap.giftUserRaw,
+            amount: giftSnap.giftAmount,
+            giftName: giftSnap.giftName,
+            source: giftSnap.giftSource,
+          }
+        : null;
       saveResult({
         winner,
         participantName: name,
@@ -90,10 +118,19 @@ export default function CrosshairScanApp() {
         operatorName: user.displayName ?? user.email ?? null,
         modeId,
         modeName,
+        gift: giftArg,
       }).catch(err => {
         console.error("[saveResult] failed", err);
         setSaveError(toSaveErrorInfo(err));
       });
+      // ギフト由来抽選なら、ギフトドキュメント本体にも「処理済み」フラグを書き戻す。
+      // 連続抽選で複数回呼ばれても merge update なので冪等 (最新時刻で上書き)。
+      // 失敗しても抽選結果自体は results に保存済みなのでログだけ。
+      if (giftSnap) {
+        markGiftProcessed(user.uid, giftSnap.giftId, user.uid).catch(err => {
+          console.error("[markGiftProcessed] failed", err);
+        });
+      }
     },
     [user],
   );
@@ -130,6 +167,7 @@ export default function CrosshairScanApp() {
   const handleFire = useCallback(() => {
     if (!canFire) return;
     setSaveError(null);
+    activeGiftRef.current = null; // 手入力経路: gift メタを必ずクリア
     const n = Math.max(1, Math.min(50, Math.floor(drawCount)));
     setRemaining(n - 1);
     fire();
@@ -138,12 +176,39 @@ export default function CrosshairScanApp() {
   const handleFireAgain = useCallback(() => {
     if (!canFire) return;
     setSaveError(null);
+    activeGiftRef.current = null;
     fireAgain();
   }, [canFire, fireAgain]);
 
   const handleCancelQueue = useCallback(() => {
     setRemaining(0);
+    activeGiftRef.current = null;
   }, []);
+
+  const handleFireFromGift = useCallback(
+    (args: FireFromGiftArgs) => {
+      if (phase === "scanning" || remaining > 0) return;
+      setSaveError(null);
+      activeGiftRef.current = {
+        giftId: args.giftId,
+        giftUserRaw: args.giftUserRaw,
+        giftAmount: args.giftAmount,
+        giftName: args.giftName,
+        giftSource: args.giftSource,
+        treatAsNewIdentity: args.treatAsNewIdentity,
+      };
+      setParticipantName(args.displayName);
+      participantRef.current = args.displayName;
+      setActiveModeId(args.modeId);
+      setDrawCount(args.count);
+      // ParticipantPanel と同じく即時 snapshot を作るため、handleFire 経由ではなく
+      // インラインで fire() を呼ぶ (state バッチ更新を待たない)。
+      const n = Math.max(1, Math.min(50, Math.floor(args.count)));
+      setRemaining(n - 1);
+      fire();
+    },
+    [phase, remaining, fire, setActiveModeId],
+  );
 
   // Continuous draws: after each locked result, auto reset → fire until queue drained.
   useEffect(() => {
@@ -157,11 +222,21 @@ export default function CrosshairScanApp() {
     return () => window.clearTimeout(t);
   }, [phase, remaining, reset, fire, tweak.continuousLockSec]);
 
+  // 連続抽選が全部完了したら gift snapshot を解除して手入力モードに戻す。
+  useEffect(() => {
+    if (phase === "idle" && remaining === 0) {
+      activeGiftRef.current = null;
+    }
+  }, [phase, remaining]);
+
   const active = phase === "locked" ? locked : candidates[scanIdx];
-  const display = active ?? candidates[0];
+  const display = active ?? candidates[0] ?? null;
   const coord = useMemo(
-    () => fmtCoord(display.lat, display.lon),
-    [display.lat, display.lon],
+    () =>
+      display
+        ? fmtCoord(display.lat, display.lon)
+        : { lat: "—", lon: "—", dec: "—" },
+    [display],
   );
 
   const themeVars = {
@@ -169,6 +244,27 @@ export default function CrosshairScanApp() {
     "--soft": theme.soft,
     "--danger": theme.danger,
   } as React.CSSProperties;
+
+  if (!display) {
+    return (
+      <div
+        className={styles.root}
+        data-theme={tweak.theme}
+        style={themeVars}
+      >
+        <Frame />
+        <div className={hudStyles.root}>
+          <div className={hudStyles.row}>
+            <HudHeader />
+          </div>
+        </div>
+        <div className={styles.emptyState}>
+          候補がまだ登録されていません。
+          <a href="/edit">/edit</a> から追加してください。
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.root} data-theme={tweak.theme} style={themeVars}>
@@ -219,6 +315,17 @@ export default function CrosshairScanApp() {
       />
 
       <CandidatesPool candidates={candidates} />
+
+      {phase === "idle" && remaining === 0 && (
+        <GiftQueuePanel
+          gifts={gifts}
+          busy={false}
+          onFire={handleFireFromGift}
+          loading={giftsLoading}
+          error={giftsError}
+        />
+      )}
+
       <OperatorAvatar
         phase={phase}
         locked={locked}

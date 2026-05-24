@@ -102,7 +102,7 @@
 
 .headerRow {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 0.6fr 1.2fr 2fr;
+  grid-template-columns: 28px 1.4fr 1fr 0.6fr 1.2fr 2fr;
   gap: 12px;
   align-items: center;
   padding: 6px 12px;
@@ -115,7 +115,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 0.6fr 1.2fr 2fr;
+  grid-template-columns: 28px 1.4fr 1fr 0.6fr 1.2fr 2fr;
   gap: 12px;
   align-items: center;
   padding: 10px 12px;
@@ -123,6 +123,101 @@
   background: var(--panel);
   margin-bottom: 6px;
   font-size: 12px;
+}
+
+.checkCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkCell input {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+}
+
+.row.selected {
+  background: var(--soft);
+  border-color: var(--primary);
+}
+
+.mergeBar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  background: var(--primary);
+  color: oklch(1 0 0);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(170, 130, 120, 0.18);
+}
+
+.mergeBar select {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 4px 8px;
+  background: oklch(1 0 0);
+  color: var(--text);
+  border: 0;
+  cursor: pointer;
+  min-width: 220px;
+}
+
+.mergeBar button {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  background: oklch(1 0 0);
+  color: var(--primary);
+  border: 0;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.mergeBar button:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.mergeBar button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mergeBar button.ghost {
+  background: transparent;
+  color: oklch(1 0 0);
+  border: 1px solid oklch(1 0 0);
+}
+
+.mergeStatus {
+  margin-left: auto;
+  font-weight: 400;
+  opacity: 0.9;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 880px) {
+  .headerRow,
+  .row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .headerRow {
+    display: none;
+  }
 }
 
 .name {
@@ -219,15 +314,4 @@
 
 .openLink:hover {
   color: var(--primary);
-}
-
-@media (max-width: 880px) {
-  .headerRow,
-  .row {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-  .headerRow {
-    display: none;
-  }
 }

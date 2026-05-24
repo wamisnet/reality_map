@@ -8,7 +8,12 @@ import { poseForRank } from "@/data/character";
 import { voiceLineFor } from "@/data/voice-lines";
 import { getCandidateImages } from "@/types";
 import { fmtCoord } from "@/lib/japan-data";
-import { fetchResultById, isValidParticipantId } from "@/lib/results";
+import { fetchCandidateById } from "@/lib/candidates-store";
+import {
+  fetchResultById,
+  isValidParticipantId,
+  type ResultDoc,
+} from "@/lib/results";
 import ShareButtons from "./ShareButtons";
 import styles from "./page.module.css";
 
@@ -24,14 +29,34 @@ async function loadResult(participantId: string, resultId: string) {
   return r;
 }
 
+// Twitter は 280 文字制限。URL は t.co 短縮で約 23 文字扱い。
+// 結果行 + 誘い文 + URL でおよそ 100 文字消費するので、説明文は ~120 文字で打ち切る。
+const DESC_MAX = 120;
+
+function truncate(s: string, max: number): string {
+  const trimmed = s.trim();
+  if (trimmed.length <= max) return trimmed;
+  return trimmed.slice(0, max - 1).trimEnd() + "…";
+}
+
+function buildShareText(r: ResultDoc, descOverride: string | null): string {
+  const rankSuffix = r.rank ? ` (RANK ${r.rank})` : "";
+  // 投稿者本人視点。「○○さんは」は冗長なので入れない。
+  const head = `旅ガチャで ${r.pref}・${r.candidateName}${rankSuffix} を引き当てたよ✨`;
+  const descSource = descOverride ?? r.desc;
+  const desc = descSource ? truncate(descSource, DESC_MAX) : "";
+  const invite = "咲月わみの Reality 枠に遊びにいって旅ガチャを引きに来ない?";
+  return [head, desc, invite].filter(Boolean).join("\n\n");
+}
+
 export async function generateMetadata(
   { params }: PageProps,
 ): Promise<Metadata> {
   const { participantId, resultId } = await params;
   const r = await loadResult(participantId, resultId);
   if (!r) return { title: "Not found" };
-  const title = `${r.participantName} さんは「${r.candidateName}」が選ばれたよ · 咲月わみの旅ガチャ`;
-  const desc = `${r.pref} · ${r.candidateName}${r.rank ? ` (RANK ${r.rank})` : ""} が選ばれました。`;
+  const title = `${r.participantName} さんが「${r.candidateName}」を引き当てたよ · 咲月わみの旅ガチャ`;
+  const desc = `${r.pref} · ${r.candidateName}${r.rank ? ` (RANK ${r.rank})` : ""} を引き当てました。`;
   return {
     title,
     description: desc,
@@ -54,10 +79,19 @@ export default async function ResultPage({ params }: PageProps) {
   if (!r) notFound();
 
   const coord = fmtCoord(r.lat, r.lon);
-  const placeLabel = r.category ?? r.pref;
+  const placeLabel = r.pref;
   const pose = poseForRank(r.rank);
   const voiceLine = await voiceLineFor(r.rank, r.id);
-  const images = getCandidateImages(r);
+
+  // 画像と説明文は最新の候補ドキュメントから引き直す。
+  // 候補が削除済み・古い結果で candidateId 未保存のときはスナップショットを使う。
+  const liveCandidate = r.candidateId
+    ? await fetchCandidateById(r.candidateId).catch(() => null)
+    : null;
+  const images = liveCandidate
+    ? getCandidateImages(liveCandidate)
+    : getCandidateImages(r);
+  const effectiveDesc = liveCandidate?.desc ?? r.desc;
 
   return (
     <div className={styles.root}>
@@ -110,12 +144,12 @@ export default async function ResultPage({ params }: PageProps) {
           </section>
         )}
 
-        {r.desc && (
+        {effectiveDesc && (
           <section className={styles.descBlock}>
             <h2 className={styles.sectionHead}>
-              <span className={styles.deco}>♡</span> About this place
+              <span className={styles.deco}>♡</span> 咲月わみからのコメント
             </h2>
-            <p className={styles.descBody}>{r.desc}</p>
+            <p className={styles.descBody}>{effectiveDesc}</p>
           </section>
         )}
 
@@ -156,7 +190,7 @@ export default async function ResultPage({ params }: PageProps) {
         </section>
 
         <ShareButtons
-          shareText={`${r.participantName} さんは ${r.pref}・${r.candidateName}${r.rank ? ` (RANK ${r.rank})` : ""} が選ばれたよ`}
+          shareText={buildShareText(r, effectiveDesc)}
         />
       </main>
     </div>

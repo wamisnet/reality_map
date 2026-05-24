@@ -33,7 +33,6 @@ function emptyDraft(order: number): EditableCandidate {
     image: null,
     images: null,
     desc: null,
-    category: null,
     rank: "C",
     order,
   };
@@ -41,7 +40,7 @@ function emptyDraft(order: number): EditableCandidate {
 
 export default function EditCandidatesPage() {
   const { user } = useAuth();
-  const { candidates, loading, usingFallback } = useCandidates();
+  const { candidates, loading } = useCandidates();
   const [error, setError] = useState<SaveErrorInfo | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [newDraft, setNewDraft] = useState<EditableCandidate | null>(null);
@@ -61,7 +60,6 @@ export default function EditCandidatesPage() {
           lat: patch.lat,
           images: getCandidateImages(patch),
           desc: patch.desc ?? null,
-          category: patch.category?.trim() || null,
           rank: patch.rank,
           order: patch.order,
         };
@@ -106,12 +104,6 @@ export default function EditCandidatesPage() {
           {candidates.length} entries · {loading ? "loading…" : "live"}
         </span>
       </div>
-
-      {usingFallback && !loading && (
-        <div className={editStyles.fallbackNotice}>
-          Firestore からデータが読めないため、in-code のフォールバックを表示中です。
-        </div>
-      )}
 
       <RankLegend
         variant="operator"

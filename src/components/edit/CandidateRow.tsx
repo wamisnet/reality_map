@@ -82,7 +82,6 @@ export default function CandidateRow({
     draft.lat !== initial.lat ||
     draft.rank !== initial.rank ||
     draft.order !== initial.order ||
-    (draft.category ?? null) !== (initial.category ?? null) ||
     !imagesEqual(draftImages, initialImages) ||
     (draft.desc ?? null) !== (initial.desc ?? null);
 
@@ -212,15 +211,6 @@ export default function CandidateRow({
         value={draft.name}
         onChange={e => setDraft({ ...draft, name: e.target.value })}
         placeholder="場所の名前"
-        disabled={busy || saving}
-      />
-      <input
-        className={editStyles.input}
-        value={draft.category ?? ""}
-        onChange={e =>
-          setDraft({ ...draft, category: e.target.value || null })
-        }
-        placeholder="種類 (例: 動物園)"
         disabled={busy || saving}
       />
       <input

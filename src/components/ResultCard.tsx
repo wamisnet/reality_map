@@ -44,9 +44,7 @@ export default function ResultCard({
     .filter(Boolean)
     .join(" ");
 
-  // category が設定されていればそれを大見出しにする (例: "動物園")。
-  // 未設定なら従来通り都道府県名を表示。
-  const tag = display.category || display.pref;
+  const tag = display.pref;
 
   return (
     <div className={classes}>
