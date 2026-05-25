@@ -13,7 +13,7 @@ export const CONFIG: Tweak = {
   autoCloseSec: 55,   // ロックから自動クローズまでの秒数
   detailDelaySec: 1.6, // ロック後に画像/説明文を出すまでの秒数
   lockZoom: 12,       // ロック時のズーム
-  continuousLockSec: 15, // 連続抽選時、ロック表示を維持してから次へ進むまでの秒数
+  continuousLockSec: 4, // 連続抽選時、ロック表示を維持してから次へ進むまでの秒数 (一時的に 4。通常は 15)
   avoidRecentRepeat: 10, // 直近 N 件の当選候補を除外する (0 で機能オフ)。候補が枯れたら自動でフォールバック
 };
 

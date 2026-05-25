@@ -277,12 +277,22 @@ export async function fetchResultsByParticipantId(
 
 /**
  * 参加者の結果リストから「ランク別のユニーク当選候補数」を集計する。
- * ガチャの性質上同じ候補が複数回当たるので、candidateId で重複排除する。
- * 古い結果には candidateId が無いので、フォールバックとして pref+candidateName を
- * 安定キーとして扱う (改名されると別物として数えてしまうが、null よりはマシ)。
+ *
+ * `result.rank` は抽選時点のスナップショットなので、後から候補のランクが
+ * 書き換えられたり、候補が削除されると、ナイーブに `result.rank` を集計
+ * すると hits[R] > totals[R] (例: 35 / 34) という不整合が出る。
+ *
+ * このため liveRanks (現存する候補の現在のランクの Map) を引数に取り、
+ * 「いま存在する rank=R の候補のうち、参加者がこれまで引いた件数」を返す。
+ * これにより hits[R] ≤ totals[R] が定義上保証される。
+ *
+ * - 結果に candidateId が無いもの (古いスキーマ) はカウント対象外。
+ * - liveRanks に無い candidateId (= 候補が削除された) もカウント対象外。
+ * - 同じ候補を複数回引いていてもユニーク数として 1 で数える。
  */
 export function computeRankHits(
   results: ReadonlyArray<ResultDoc>,
+  liveRanks: ReadonlyMap<string, Rank>,
 ): Record<Rank, number> {
   const seenPerRank: Record<Rank, Set<string>> = {
     S: new Set(),
@@ -291,9 +301,10 @@ export function computeRankHits(
     C: new Set(),
   };
   for (const r of results) {
-    if (!r.rank) continue;
-    const key = r.candidateId ?? `legacy:${r.pref}|${r.candidateName}`;
-    seenPerRank[r.rank].add(key);
+    if (!r.candidateId) continue;
+    const live = liveRanks.get(r.candidateId);
+    if (!live) continue;
+    seenPerRank[live].add(r.candidateId);
   }
   return {
     S: seenPerRank.S.size,
@@ -301,6 +312,17 @@ export function computeRankHits(
     B: seenPerRank.B.size,
     C: seenPerRank.C.size,
   };
+}
+
+/** 結果リストに登場するユニーク candidateId を返す (null は除外)。 */
+export function uniqueCandidateIds(
+  results: ReadonlyArray<ResultDoc>,
+): string[] {
+  const set = new Set<string>();
+  for (const r of results) {
+    if (r.candidateId) set.add(r.candidateId);
+  }
+  return Array.from(set);
 }
 
 export async function fetchResultById(resultId: string): Promise<ResultDoc | null> {

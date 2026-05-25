@@ -3,8 +3,10 @@ import {
   collection,
   deleteDoc,
   doc,
+  documentId,
   getCountFromServer,
   getDoc,
+  getDocs,
   onSnapshot,
   orderBy,
   query,
@@ -199,3 +201,67 @@ export const fetchCandidateRankCounts = unstable_cache(
   ["candidate-rank-counts:v1"],
   { revalidate: 300, tags: ["candidate-counts"] },
 );
+
+export interface CandidateLite {
+  id: string;
+  name: string;
+  pref: string;
+  rank: Rank;
+}
+
+/**
+ * 全候補を最小フィールド (id/name/pref/rank) で取得する。
+ * Admin の「未取得候補一覧」など、件数より中身を見たいケース向け。
+ * 候補数が増えてもページ単位の data 量はたかが知れているので Cache 無し。
+ */
+export async function fetchAllCandidatesLite(): Promise<CandidateLite[]> {
+  const db = getDb();
+  const snap = await getDocs(
+    query(collection(db, COLLECTION), orderBy("order", "asc")),
+  );
+  return snap.docs.map(d => {
+    const data = d.data() as RawCandidate;
+    return {
+      id: d.id,
+      name: String(data.name ?? ""),
+      pref: String(data.pref ?? ""),
+      rank: toRank(data.rank),
+    };
+  });
+}
+
+/**
+ * 指定 ID 群の候補について、**現在の** rank を引いて Map で返す。
+ *
+ * 抽選結果ドキュメントには抽選時点のランクがスナップショットとして保存されているが、
+ * 後から候補側でランクが変わると hits[R] と totals[R] の比較で不整合が出る
+ * (例: 35 / 34)。コンプリート率は「いま存在する rank=R 候補のうち何件引いたか」が
+ * 自然な意味付けなので、結果に出てきた candidateId の現ランクを引き直して使う。
+ *
+ * 存在しない (削除済み) ID は Map に入らない。rank フィールドが壊れている候補も
+ * 同様に除外する (toRank では default に流れないので、生の値で判定)。
+ *
+ * Firestore の `where(documentId(), "in", ...)` は 1 クエリ 30 件まで対応。
+ */
+export async function fetchCandidateRanksByIds(
+  ids: ReadonlyArray<string>,
+): Promise<Map<string, Rank>> {
+  const out = new Map<string, Rank>();
+  if (ids.length === 0) return out;
+
+  const db = getDb();
+  const col = collection(db, COLLECTION);
+  const BATCH = 30;
+
+  for (let i = 0; i < ids.length; i += BATCH) {
+    const chunk = ids.slice(i, i + BATCH);
+    const snap = await getDocs(query(col, where(documentId(), "in", chunk)));
+    for (const d of snap.docs) {
+      const raw = (d.data() as RawCandidate).rank;
+      if (raw === "S" || raw === "A" || raw === "B" || raw === "C") {
+        out.set(d.id, raw);
+      }
+    }
+  }
+  return out;
+}

@@ -5,11 +5,15 @@ import Character from "@/components/public/Character";
 import ParticipantHitStats from "@/components/public/ParticipantHitStats";
 import PublicPageHeader from "@/components/public/PublicPageHeader";
 import RankLegend from "@/components/RankLegend";
-import { fetchCandidateRankCounts } from "@/lib/candidates-store";
+import {
+  fetchCandidateRankCounts,
+  fetchCandidateRanksByIds,
+} from "@/lib/candidates-store";
 import {
   computeRankHits,
   fetchResultsByParticipantId,
   isValidParticipantId,
+  uniqueCandidateIds,
 } from "@/lib/results";
 import styles from "./page.module.css";
 
@@ -70,7 +74,14 @@ export default async function ParticipantPage({ params }: PageProps) {
     fetchCandidateRankCounts().catch(() => ({ S: 0, A: 0, B: 0, C: 0 })),
   ]);
   const participantName = results[0]?.participantName ?? null;
-  const hits = computeRankHits(results);
+
+  // result.rank はスナップショットなので、現状のランクを引き直して使う。
+  // (後からランク変更された/削除された候補が hits > totals を引き起こすため)
+  const drawnIds = uniqueCandidateIds(results);
+  const liveRanks = await fetchCandidateRanksByIds(drawnIds).catch(
+    () => new Map<string, never>(),
+  );
+  const hits = computeRankHits(results, liveRanks);
 
   return (
     <div className={styles.root}>

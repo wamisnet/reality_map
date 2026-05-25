@@ -329,6 +329,12 @@ export default function ParticipantsAdmin() {
                   </button>
                   <a
                     className={styles.openLink}
+                    href={`/edit/participants/${p.participantId}`}
+                  >
+                    コンプリート →
+                  </a>
+                  <a
+                    className={styles.openLink}
                     href={`/${p.participantId}`}
                     target="_blank"
                     rel="noreferrer"
